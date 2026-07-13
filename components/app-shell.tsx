@@ -13,6 +13,8 @@ import { ScheduleTimetable } from "@/components/schedule-timetable";
 import { SubjectPicker } from "@/components/subject-picker";
 import { UploadPanel } from "@/components/upload-panel";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { ClassSection, GeneratedSchedule, NoSolutionReason, ParseResult, SchedulePreferences, SelectedSectionIds, SubjectOption } from "@/types/schedule";
 import { buildParseResult } from "@/lib/parsers/normalize";
 import { explainFailure } from "@/lib/scheduler/explain-failure";
@@ -27,12 +29,25 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   subjectTimePreferences: [],
   preferCompact: true
 };
-const APP_VERSION = "0.2.7";
+const APP_VERSION = "0.2.8";
 
 interface ExportResult {
   format: "png" | "pdf";
   fileName: string;
   url: string;
+}
+
+interface SectionEditTarget {
+  section: ClassSection;
+  frozen: boolean;
+}
+
+interface SectionEditDraft {
+  subjectCode: string;
+  subjectName: string;
+  section: string;
+  professor: string;
+  room: string;
 }
 
 export function AppShell() {
@@ -55,6 +70,14 @@ export function AppShell() {
   const [isDownloadMenuOpen, setIsDownloadMenuOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [exportResult, setExportResult] = useState<ExportResult>();
+  const [sectionEditTarget, setSectionEditTarget] = useState<SectionEditTarget>();
+  const [sectionEditDraft, setSectionEditDraft] = useState<SectionEditDraft>({
+    subjectCode: "",
+    subjectName: "",
+    section: "",
+    professor: "",
+    room: ""
+  });
   const [hasRestoredSession, setHasRestoredSession] = useState(false);
 
   useEffect(() => {
@@ -218,6 +241,54 @@ export function AppShell() {
     setIsDownloadMenuOpen(false);
     setIsPreviewOpen(false);
     setExportResult(undefined);
+    setSectionEditTarget(undefined);
+  }
+
+  function handleOpenSectionEdit(section: ClassSection, frozen: boolean) {
+    setSectionEditTarget({ section, frozen });
+    setSectionEditDraft({
+      subjectCode: section.subjectCode,
+      subjectName: section.subjectName,
+      section: section.section ?? "",
+      professor: section.professor ?? "",
+      room: section.room ?? ""
+    });
+  }
+
+  function handleSaveSectionEdit() {
+    if (!sectionEditTarget) return;
+
+    const updatedSection: ClassSection = {
+      ...sectionEditTarget.section,
+      subjectCode: sectionEditDraft.subjectCode.trim().toUpperCase() || sectionEditTarget.section.subjectCode,
+      subjectName: sectionEditDraft.subjectName.trim() || sectionEditTarget.section.subjectName,
+      section: sectionEditDraft.section.trim() || undefined,
+      professor: sectionEditDraft.professor.trim() || undefined,
+      room: sectionEditDraft.room.trim() || undefined,
+      meetings: sectionEditTarget.section.meetings
+    };
+
+    if (sectionEditTarget.frozen) {
+      setFrozenSchedules((existing) =>
+        existing.map((schedule) => ({
+          ...schedule,
+          sections: schedule.sections.map((section) => (section.id === updatedSection.id ? updatedSection : section))
+        }))
+      );
+    } else {
+      setSchedules((existing) =>
+        existing.map((schedule, index) =>
+          index === scheduleIndex
+            ? {
+                ...schedule,
+                sections: schedule.sections.map((section) => (section.id === updatedSection.id ? updatedSection : section))
+              }
+            : schedule
+        )
+      );
+    }
+
+    setSectionEditTarget(undefined);
   }
 
   async function handleExport(format: "png" | "pdf") {
@@ -371,7 +442,7 @@ export function AppShell() {
           {reasons.length > 0 ? <FeedbackCard title="Unable to generate a schedule" items={reasons} /> : null}
           {displaySchedule ? (
             <div className="space-y-3">
-              <ScheduleTimetable ref={timetableRef} schedule={displaySchedule} frozenSchedules={frozenSchedules} />
+              <ScheduleTimetable ref={timetableRef} schedule={displaySchedule} frozenSchedules={frozenSchedules} onEditSection={handleOpenSectionEdit} />
               <div className="flex justify-end">
                 <Button type="button" variant="outline" onClick={() => setIsPreviewOpen(true)}>
                   <Eye className="h-4 w-4" />
@@ -460,9 +531,78 @@ export function AppShell() {
               </Button>
             </div>
             <div className="overflow-auto p-3 sm:p-5">
-              <ScheduleTimetable schedule={displaySchedule} frozenSchedules={frozenSchedules} />
+              <ScheduleTimetable schedule={displaySchedule} frozenSchedules={frozenSchedules} onEditSection={handleOpenSectionEdit} />
             </div>
           </div>
+        </div>
+      ) : null}
+      {sectionEditTarget ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-lg">
+          <Card className="w-full max-w-lg shadow-2xl">
+            <CardContent className="space-y-5 p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-base font-semibold">Edit schedule details</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Days and times stay fixed. This only changes the displayed text.
+                  </p>
+                </div>
+                <Button type="button" size="sm" variant="ghost" onClick={() => setSectionEditTarget(undefined)} aria-label="Close schedule editor">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-subject-code">Course code</Label>
+                  <Input
+                    id="edit-subject-code"
+                    value={sectionEditDraft.subjectCode}
+                    onChange={(event) => setSectionEditDraft((draft) => ({ ...draft, subjectCode: event.target.value }))}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-section">Section</Label>
+                  <Input
+                    id="edit-section"
+                    value={sectionEditDraft.section ?? ""}
+                    onChange={(event) => setSectionEditDraft((draft) => ({ ...draft, section: event.target.value }))}
+                  />
+                </div>
+                <div className="grid gap-2 sm:col-span-2">
+                  <Label htmlFor="edit-subject-name">Course name</Label>
+                  <Input
+                    id="edit-subject-name"
+                    value={sectionEditDraft.subjectName}
+                    onChange={(event) => setSectionEditDraft((draft) => ({ ...draft, subjectName: event.target.value }))}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-professor">Professor</Label>
+                  <Input
+                    id="edit-professor"
+                    value={sectionEditDraft.professor ?? ""}
+                    onChange={(event) => setSectionEditDraft((draft) => ({ ...draft, professor: event.target.value }))}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-room">Room</Label>
+                  <Input
+                    id="edit-room"
+                    value={sectionEditDraft.room ?? ""}
+                    onChange={(event) => setSectionEditDraft((draft) => ({ ...draft, room: event.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button type="button" variant="outline" onClick={() => setSectionEditTarget(undefined)}>
+                  Cancel
+                </Button>
+                <Button type="button" onClick={handleSaveSectionEdit}>
+                  Save details
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       ) : null}
       <footer className="relative z-10 -mx-3 -mb-5 mt-12 min-h-[78vh] overflow-hidden border-t bg-white px-4 py-14 text-slate-600 dark:border-white/10 dark:bg-[#050607] dark:text-slate-400 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">

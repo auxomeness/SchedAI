@@ -95,16 +95,26 @@ function isSectionToken(value: string): boolean {
   return /^[A-Z]{1,6}\d{1,4}[A-Z]{0,4}$/i.test(value) || /^[A-Z]{2,6}\d?[A-Z]{0,3}$/i.test(value);
 }
 
+function isSectionSuffix(value: string | undefined): boolean {
+  return Boolean(value && /^[A-Z][a-z]?$/i.test(value));
+}
+
 function inferCodeAndSection(parts: string[]): { code?: string; section?: string; index: number; nextIndex: number } {
   const codeIndex = parts.findIndex((part) => /^[A-Z]{2,5}\d{3}[A-Z]?$/.test(part));
   if (codeIndex === -1) return { index: -1, nextIndex: -1 };
 
   const sectionToken = parts[codeIndex + 1];
-  if (!sectionToken || !/^[A-Z0-9]{2,}$/i.test(sectionToken)) {
+  const secondToken = parts[codeIndex + 2];
+  const canStartSplitSection = Boolean(
+    sectionToken &&
+      /^[A-Z]{1,6}$/i.test(sectionToken) &&
+      (/^\d{1,4}$/.test(secondToken ?? "") || /^\d{1,4}[A-Z]{1,4}$/i.test(secondToken ?? ""))
+  );
+
+  if (!sectionToken || (!/^[A-Z0-9]{2,}$/i.test(sectionToken) && !canStartSplitSection)) {
     return { code: parts[codeIndex], index: codeIndex, nextIndex: codeIndex + 1 };
   }
 
-  const secondToken = parts[codeIndex + 2];
   const thirdToken = parts[codeIndex + 3];
   const splitThreePartSection =
     /^[A-Z]{1,6}$/i.test(sectionToken) &&
@@ -145,13 +155,26 @@ function inferCodeAndSection(parts: string[]): { code?: string; section?: string
     };
   }
 
+  const splitLetterNumberSuffixSection =
+    /^[A-Z]{1,6}$/i.test(sectionToken) &&
+    /^\d{1,4}[A-Z]{1,4}$/i.test(secondToken ?? "") &&
+    isSectionToken(`${sectionToken}${secondToken}`);
+  if (splitLetterNumberSuffixSection) {
+    return {
+      code: parts[codeIndex],
+      section: `${sectionToken}${secondToken}`,
+      index: codeIndex,
+      nextIndex: codeIndex + 3
+    };
+  }
+
   const suffixToken = parts[codeIndex + 2];
-  const section = suffixToken && /^[A-Z][a-z]?$/.test(suffixToken) ? `${sectionToken}${suffixToken}` : sectionToken;
+  const section = isSectionSuffix(suffixToken) ? `${sectionToken}${suffixToken}` : sectionToken;
   return {
     code: parts[codeIndex],
     section,
     index: codeIndex,
-    nextIndex: codeIndex + (suffixToken && /^[A-Z][a-z]?$/.test(suffixToken) ? 3 : 2)
+    nextIndex: codeIndex + (isSectionSuffix(suffixToken) ? 3 : 2)
   };
 }
 
@@ -197,18 +220,9 @@ function extractPdfTail(tailText: string): { days: string; room: string; profess
   if (dayIndex < 0) return { days: "", room: "", professor: "" };
 
   const days = normalizeDayCandidate(tokens.slice(dayIndex, dayIndex + dayLength).join(""));
-  const afterDays = tokens.slice(dayIndex + dayLength);
-  const roomIndex = afterDays.findIndex((token) => !/^\d+(?:\.\d+)?$/.test(token));
-  const roomParts =
-    roomIndex >= 0
-      ? [
-          afterDays[roomIndex],
-          ...(afterDays[roomIndex + 1] && /^[A-Z]$/i.test(afterDays[roomIndex]) && /\d/.test(afterDays[roomIndex + 1])
-            ? [afterDays[roomIndex + 1]]
-            : [])
-        ]
-      : [];
-  const afterRoom = roomIndex >= 0 ? afterDays.slice(roomIndex + roomParts.length) : afterDays;
+  const afterDays = trimTrailingCapacity(tokens.slice(dayIndex + dayLength));
+  const roomParts = readRoomParts(afterDays);
+  const afterRoom = afterDays.slice(roomParts.length);
   const professorParts = afterRoom.filter((token) => !/^\d+(?:\.\d+)?$/.test(token));
 
   return {
@@ -218,6 +232,37 @@ function extractPdfTail(tailText: string): { days: string; room: string; profess
   };
 }
 
+function trimTrailingCapacity(tokens: string[]): string[] {
+  let end = tokens.length;
+  while (end > 0 && /^\d+(?:\.\d+)?$/.test(tokens[end - 1])) end -= 1;
+  return tokens.slice(0, end);
+}
+
+function readRoomParts(tokens: string[]): string[] {
+  const first = tokens[0];
+  if (!first) return [];
+
+  const second = tokens[1];
+  if (/^[A-Z]$/i.test(first) && second && /\d/.test(second)) {
+    const third = tokens[2];
+    const fourth = tokens[3];
+    if (third === "/" && fourth && /^[A-Z]{2,}$/i.test(fourth)) return [first, second, third, fourth];
+    return [first, second];
+  }
+
+  if (/^[A-Z]{1,5}\d+[A-Z]?(?:\/[A-Z]+)?$/i.test(first)) {
+    const second = tokens[1];
+    const third = tokens[2];
+    if (second === "/" && third && /^[A-Z]{2,}$/i.test(third)) return [first, second, third];
+    if (second && /^[A-Z]$/i.test(second) && third && !/^\d+(?:\.\d+)?$/.test(third)) return [first, second];
+    return [first];
+  }
+
+  if (/^(?:ONLINE|LIBRARY|GYM|FIELD|TBA)$/i.test(first)) return [first];
+
+  return [];
+}
+
 function normalizeSection(section: Omit<ClassSection, "id">, seed: number): ClassSection | undefined {
   if (!section.subjectCode || !section.subjectName || section.meetings.length === 0) return undefined;
   return {
@@ -225,7 +270,7 @@ function normalizeSection(section: Omit<ClassSection, "id">, seed: number): Clas
     subjectCode: section.subjectCode.toUpperCase(),
     subjectName: section.subjectName.replace(/\s+/g, " ").trim(),
     section: section.section?.trim() || undefined,
-    professor: section.professor?.replace(/\s+/g, " ").trim() || undefined,
+    professor: section.professor?.replace(/\s+/g, " ").replace(/\s*,\s*/g, ", ").trim() || undefined,
     room: section.room?.replace(/\s+/g, " ").trim() || undefined,
     id: `${section.subjectCode}-${section.section ?? "section"}-${seed}`.replace(/\s+/g, "-")
   };

@@ -17,6 +17,7 @@ const COLORS = [
 interface ScheduleTimetableProps {
   schedule: GeneratedSchedule;
   frozenSchedules?: GeneratedSchedule[];
+  onEditSection?: (section: ClassSection, frozen: boolean) => void;
 }
 
 type TimetableEntry = {
@@ -26,7 +27,7 @@ type TimetableEntry = {
 };
 
 export const ScheduleTimetable = forwardRef<HTMLDivElement, ScheduleTimetableProps>(function ScheduleTimetable(
-  { schedule, frozenSchedules = [] },
+  { schedule, frozenSchedules = [], onEditSection },
   ref
 ) {
   const frozenSections = frozenSchedules.flatMap((item) => item.sections);
@@ -88,6 +89,7 @@ export const ScheduleTimetable = forwardRef<HTMLDivElement, ScheduleTimetablePro
                     section={section}
                     frozen={frozen}
                     offset={index}
+                    onEdit={onEditSection}
                   />
                 ))}
             </div>
@@ -104,7 +106,8 @@ function ClassBlock({
   min,
   total,
   color,
-  frozen
+  frozen,
+  onEdit
 }: {
   section: GeneratedSchedule["sections"][number];
   meeting: Meeting;
@@ -113,17 +116,25 @@ function ClassBlock({
   color: string;
   frozen: boolean;
   offset: number;
+  onEdit?: (section: ClassSection, frozen: boolean) => void;
 }) {
   const top = ((meeting.start - min) / total) * 100;
   const height = ((meeting.end - meeting.start) / total) * 100;
 
   return (
-    <div
-      className={cn("absolute left-2 right-2 overflow-hidden rounded-xl border p-2 shadow-sm", color)}
+    <button
+      type="button"
+      className={cn(
+        "absolute left-2 right-2 overflow-hidden rounded-xl border p-2 text-left shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        onEdit ? "cursor-pointer hover:brightness-[0.98]" : "cursor-default",
+        color
+      )}
       style={{ top: `calc(${top}% + 4px)`, height: `calc(${height}% - 8px)` }}
+      onClick={() => onEdit?.(section, frozen)}
+      aria-label={`Edit ${section.subjectCode} details`}
     >
       {frozen ? <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide opacity-70">Frozen</div> : null}
       <ScheduleCard section={section} />
-    </div>
+    </button>
   );
 }

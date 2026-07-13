@@ -1,7 +1,7 @@
 # SchedAI
 
 **Author:** Karl Austin B. Pavia  
-**Version:** 0.2.7
+**Version:** 0.2.8
 
 SchedAI is a personal schedule generator for university students.
 
