@@ -24,9 +24,10 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   blockedDays: [],
   protectBreak: false,
   breaks: [],
+  subjectTimePreferences: [],
   preferCompact: true
 };
-const APP_VERSION = "0.2.5";
+const APP_VERSION = "0.2.6";
 
 interface ExportResult {
   format: "png" | "pdf";
@@ -346,7 +347,12 @@ export function AppShell() {
             onChange={setSelectedSubjects}
             onSelectedSectionIdsChange={setSelectedSectionIds}
           />
-          <PreferencesPanel preferences={preferences} onChange={setPreferences} />
+          <PreferencesPanel
+            preferences={preferences}
+            selectedSubjects={selectedSubjects}
+            subjects={subjects}
+            onChange={setPreferences}
+          />
           <div className="grid gap-3">
             <Button size="lg" disabled={!canGenerate} onClick={handleGenerate}>
               <CalendarCheck2 className="h-4 w-4" />
@@ -528,6 +534,7 @@ function normalizePreferences(preferences: SchedulePreferences): SchedulePrefere
   return {
     ...DEFAULT_PREFERENCES,
     ...preferences,
+    subjectTimePreferences: preferences.subjectTimePreferences ?? [],
     breaks: preferences.breaks?.length ? preferences.breaks : legacyBreak
   };
 }

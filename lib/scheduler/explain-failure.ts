@@ -11,6 +11,15 @@ function activeBreaks(preferences: SchedulePreferences) {
   return preferences.protectBreak ? breaks.filter((item) => item.end > item.start) : [];
 }
 
+function activeSubjectTimePreferences(preferences: SchedulePreferences) {
+  return (preferences.subjectTimePreferences ?? [])
+    .map((item) => ({
+      ...item,
+      subjectCode: item.subjectCode.trim().toUpperCase()
+    }))
+    .filter((item) => item.subjectCode && item.end > item.start);
+}
+
 export function explainFailure(
   sections: ClassSection[],
   selectedSubjects: string[],
@@ -27,6 +36,21 @@ export function explainFailure(
         suggestion: "Check if the subject code appears in the file or remove it from your selection."
       });
       return;
+    }
+
+    const blockingSubjectTime = activeSubjectTimePreferences(preferences)
+      .filter((item) => item.subjectCode === subject)
+      .find((rule) =>
+        subjectSections.every((section) =>
+          !section.meetings.some((meeting) => meeting.start === rule.start && meeting.end === rule.end)
+        )
+      );
+
+    if (blockingSubjectTime) {
+      reasons.push({
+        message: `${subject} has no available section at your preferred time (${formatMinutes(blockingSubjectTime.start)} - ${formatMinutes(blockingSubjectTime.end)}).`,
+        suggestion: "Try changing that preferred subject time or choosing more sections for the course."
+      });
     }
 
     if (

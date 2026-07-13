@@ -5,18 +5,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { SchedulePreferences, Weekday } from "@/types/schedule";
+import type { SchedulePreferences, SubjectOption, Weekday } from "@/types/schedule";
 import { DAYS, formatMinutes, parseTimeToMinutes } from "@/lib/scheduler/time";
 
 const TIME_OPTIONS = Array.from({ length: 30 }, (_, index) => 7 * 60 + index * 30);
 
 interface PreferencesPanelProps {
   preferences: SchedulePreferences;
+  selectedSubjects: string[];
+  subjects: SubjectOption[];
   onChange: (preferences: SchedulePreferences) => void;
 }
 
-export function PreferencesPanel({ preferences, onChange }: PreferencesPanelProps) {
+export function PreferencesPanel({ preferences, selectedSubjects, subjects, onChange }: PreferencesPanelProps) {
   const blockedDays = new Set(preferences.blockedDays ?? []);
+  const subjectTimePreferences = preferences.subjectTimePreferences ?? [];
+  const selectedSubjectSet = new Set(selectedSubjects);
+  const subjectOptions = [...subjects].sort((a, b) => {
+    const selectedDelta = Number(selectedSubjectSet.has(b.code)) - Number(selectedSubjectSet.has(a.code));
+    return selectedDelta || a.code.localeCompare(b.code);
+  });
   const breakWindows = preferences.breaks?.length
     ? preferences.breaks
     : preferences.breakStart !== undefined && preferences.breakEnd !== undefined
@@ -52,6 +60,40 @@ export function PreferencesPanel({ preferences, onChange }: PreferencesPanelProp
     update({
       breaks: nextBreaks,
       protectBreak: nextBreaks.length > 0 ? preferences.protectBreak : false
+    });
+  }
+
+  function addSubjectTimePreference() {
+    const subjectCode = selectedSubjects[0] ?? subjectOptions[0]?.code;
+    if (!subjectCode) return;
+
+    update({
+      subjectTimePreferences: [
+        ...subjectTimePreferences,
+        {
+          id: `subject-time-${Date.now()}`,
+          subjectCode,
+          start: parseTimeToMinutes("1:30 PM") ?? 810,
+          end: parseTimeToMinutes("3:00 PM") ?? 900
+        }
+      ]
+    });
+  }
+
+  function updateSubjectTimePreference(
+    id: string,
+    patch: { subjectCode?: string; start?: number; end?: number }
+  ) {
+    update({
+      subjectTimePreferences: subjectTimePreferences.map((item) =>
+        item.id === id ? { ...item, ...patch } : item
+      )
+    });
+  }
+
+  function removeSubjectTimePreference(id: string) {
+    update({
+      subjectTimePreferences: subjectTimePreferences.filter((item) => item.id !== id)
     });
   }
 
@@ -100,6 +142,84 @@ export function PreferencesPanel({ preferences, onChange }: PreferencesPanelProp
           <Checkbox checked={preferences.preferCompact} onCheckedChange={(checked) => update({ preferCompact: checked === true })} />
           <span className="text-sm font-medium">Prefer compact schedule</span>
         </label>
+
+        <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#050505]/90">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-sm font-medium">Preferred subject times</div>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                Require a course to use a specific time window when generating schedules.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl border bg-white/70 px-3 text-sm font-medium hover:bg-secondary disabled:pointer-events-none disabled:opacity-50 dark:bg-[#050505]"
+              onClick={addSubjectTimePreference}
+              disabled={subjectOptions.length === 0}
+            >
+              <Plus className="h-4 w-4" />
+              Add
+            </button>
+          </div>
+
+          {subjectTimePreferences.length > 0 ? (
+            <div className="mt-3 space-y-3">
+              {subjectTimePreferences.map((item, index) => (
+                <div key={item.id} className="rounded-xl border bg-white/70 p-3 dark:bg-[#050505]">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Rule {index + 1}
+                    </span>
+                    <button
+                      type="button"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border text-muted-foreground hover:bg-secondary"
+                      onClick={() => removeSubjectTimePreference(item.id)}
+                      aria-label={`Remove preferred subject time ${index + 1}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.3fr_1fr_1fr]">
+                    <div className="space-y-2">
+                      <Label>Course</Label>
+                      <Select
+                        value={item.subjectCode}
+                        onValueChange={(value) => updateSubjectTimePreference(item.id, { subjectCode: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose course" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {subjectOptions.map((subject) => (
+                            <SelectItem key={subject.code} value={subject.code}>
+                              {subject.code}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Starts</Label>
+                      <TimeSelect
+                        placeholder="1:30 PM"
+                        value={item.start}
+                        onChange={(value) => value !== undefined && updateSubjectTimePreference(item.id, { start: value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Ends</Label>
+                      <TimeSelect
+                        placeholder="3:00 PM"
+                        value={item.end}
+                        onChange={(value) => value !== undefined && updateSubjectTimePreference(item.id, { end: value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
 
         <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#050505]/90">
           <label className="flex items-center gap-3">

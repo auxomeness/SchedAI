@@ -14,9 +14,28 @@ function activeBreaks(preferences: SchedulePreferences) {
   return preferences.protectBreak ? breaks.filter((item) => item.end > item.start) : [];
 }
 
+function activeSubjectTimePreferences(preferences: SchedulePreferences) {
+  return (preferences.subjectTimePreferences ?? [])
+    .map((item) => ({
+      ...item,
+      subjectCode: item.subjectCode.trim().toUpperCase()
+    }))
+    .filter((item) => item.subjectCode && item.end > item.start);
+}
+
+function violatesSubjectTimePreference(section: ClassSection, preferences: SchedulePreferences): boolean {
+  const rules = activeSubjectTimePreferences(preferences).filter((item) => item.subjectCode === section.subjectCode);
+  if (!rules.length) return false;
+
+  return rules.some((rule) =>
+    !section.meetings.some((meeting) => meeting.start === rule.start && meeting.end === rule.end)
+  );
+}
+
 function violatesPreferences(section: ClassSection, preferences: SchedulePreferences): boolean {
   const meetings = section.meetings;
   const blockedDays = new Set([...(preferences.blockedDays ?? []), ...(preferences.noFriday ? ["FRI" as const] : [])]);
+  if (violatesSubjectTimePreference(section, preferences)) return true;
   if (meetings.some((meeting) => blockedDays.has(meeting.day))) return true;
   if (preferences.earliestTime !== undefined && meetings.some((meeting) => meeting.start < preferences.earliestTime!)) return true;
   if (preferences.latestTime !== undefined && meetings.some((meeting) => meeting.end > preferences.latestTime!)) return true;

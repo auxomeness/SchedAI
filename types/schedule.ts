@@ -31,6 +31,7 @@ export interface SchedulePreferences {
   latestTime?: number;
   protectBreak: boolean;
   breaks: BreakWindow[];
+  subjectTimePreferences: SubjectTimePreference[];
   breakStart?: number;
   breakEnd?: number;
   maxClassesPerDay?: number;
@@ -39,6 +40,13 @@ export interface SchedulePreferences {
 
 export interface BreakWindow {
   id: string;
+  start: number;
+  end: number;
+}
+
+export interface SubjectTimePreference {
+  id: string;
+  subjectCode: string;
   start: number;
   end: number;
 }
