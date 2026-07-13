@@ -13,7 +13,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var theme = localStorage.getItem("schedai-theme-v1");
+                var session = localStorage.getItem("schedai-session-v2");
+                if (!theme && session) theme = JSON.parse(session).isDarkMode ? "dark" : "light";
+                document.documentElement.classList.toggle("dark", theme === "dark");
+              } catch (_) {}
+            `
+          }}
+        />
+      </head>
       <body className="min-h-screen antialiased">{children}</body>
     </html>
   );

@@ -16,7 +16,7 @@ import type { ClassSection, GeneratedSchedule, NoSolutionReason, ParseResult, Sc
 import { buildParseResult } from "@/lib/parsers/normalize";
 import { explainFailure } from "@/lib/scheduler/explain-failure";
 import { generateSchedules } from "@/lib/scheduler/generate-schedules";
-import { clearStoredSession, loadStoredPreferences, loadStoredSession, saveStoredSession } from "@/lib/storage";
+import { clearStoredSession, loadStoredPreferences, loadStoredSession, loadStoredTheme, saveStoredSession, saveStoredTheme } from "@/lib/storage";
 
 const DEFAULT_PREFERENCES: SchedulePreferences = {
   noFriday: false,
@@ -25,7 +25,7 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   breaks: [],
   preferCompact: true
 };
-const APP_VERSION = "0.2.4";
+const APP_VERSION = "0.2.5";
 
 interface ExportResult {
   format: "png" | "pdf";
@@ -68,13 +68,14 @@ export function AppShell() {
       setFrozenSchedules(storedSession.frozenSchedules);
       setScheduleIndex(storedSession.scheduleIndex);
       setFileName(storedSession.fileName);
-      setIsDarkMode(storedSession.isDarkMode);
+      setIsDarkMode(loadStoredTheme() ?? storedSession.isDarkMode);
       setHasRestoredSession(true);
       return;
     }
 
     const storedPreferences = loadStoredPreferences();
     if (storedPreferences) setPreferences(normalizePreferences(storedPreferences));
+    setIsDarkMode(loadStoredTheme() ?? false);
     setHasRestoredSession(true);
   }, []);
 
@@ -96,6 +97,7 @@ export function AppShell() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
+    saveStoredTheme(isDarkMode);
   }, [isDarkMode]);
 
   useEffect(() => {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface LegalSection {
   id: string;
@@ -24,11 +25,14 @@ export function LegalPage({ eyebrow, title, intro, documentTitle, documentSummar
             <span>SchedAI</span>
             <span className="font-normal text-muted-foreground">by Arxeni</span>
           </Link>
-          <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-muted-foreground sm:gap-6">
-            <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
-            <Link href="/terms" className="hover:text-foreground">Terms</Link>
-            <Link href="/" className="hover:text-foreground">Workspace</Link>
-          </nav>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-5">
+            <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-muted-foreground sm:gap-6">
+              <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
+              <Link href="/terms" className="hover:text-foreground">Terms</Link>
+              <Link href="/" className="hover:text-foreground">Workspace</Link>
+            </nav>
+            <ThemeToggle className="h-9 px-3" />
+          </div>
         </div>
       </header>
 
