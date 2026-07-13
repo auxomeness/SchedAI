@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
-import { AlertCircle, CalendarCheck2, Download, Eye, Facebook, FileDown, Github, Linkedin, Lock, Moon, Plus, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
+import { AlertCircle, CalendarCheck2, Download, Eye, Facebook, FileDown, Github, Instagram, Linkedin, Lock, Moon, Plus, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { ManualSubjectForm } from "@/components/manual-subject-form";
@@ -406,7 +406,8 @@ export function AppShell() {
               links={[
                 { label: "GitHub", href: "https://github.com/auxomeness", icon: Github },
                 { label: "LinkedIn", href: "https://www.linkedin.com/in/karlaustinpavia", icon: Linkedin },
-                { label: "Facebook", href: "https://www.facebook.com/karlaustin.pavia", icon: Facebook }
+                { label: "Facebook", href: "https://www.facebook.com/karlaustin.pavia", icon: Facebook },
+                { label: "Instagram", href: "https://www.instagram.com/thatguyaustinn/", icon: Instagram }
               ]}
             />
             <FooterColumn title="Legal" links={["Terms", "Privacy"]} />

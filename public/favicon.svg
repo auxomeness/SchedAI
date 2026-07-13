@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SchedAI">
+  <rect width="64" height="64" rx="16" fill="#050607"/>
+  <path d="M18 45 31.8 14h6.5L24.6 45H18Z" fill="#fff"/>
+  <path d="M33.9 14 47 45h-7.2l-2.1-5.4H27.2l2.4-5.9h5.9l-5.1-13.2L33.9 14Z" fill="#fff"/>
+  <path d="M17 18.5 31.5 9l7.7 5-4.4 3.2-3.3-2.1-9.4 6.2v21.4l9.4 6.2 9.4-6.2V31.1h5.1v14.4L31.5 55 17 45.5v-27Z" fill="#fff" opacity=".82"/>
+</svg>
