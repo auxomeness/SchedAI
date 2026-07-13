@@ -25,7 +25,7 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   breaks: [],
   preferCompact: true
 };
-const APP_VERSION = "0.2.2";
+const APP_VERSION = "0.2.3";
 
 export function AppShell() {
   const timetableRef = useRef<HTMLDivElement>(null);
@@ -266,26 +266,26 @@ export function AppShell() {
                 </div>
               ) : null}
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
+            <div className="grid grid-cols-2 gap-2">
               <Button className="min-w-0" variant="outline" disabled={!currentSchedule} onClick={handleMarkComplete}>
                 <Lock className="h-4 w-4" />
-                <span className="truncate">Complete</span>
+                <span className="min-w-0 truncate">Complete</span>
               </Button>
               <Button className="min-w-0" variant="outline" disabled={frozenSchedules.length === 0} onClick={handleNewSchedule}>
                 <Plus className="h-4 w-4" />
-                <span className="truncate">New</span>
+                <span className="min-w-0 truncate">New</span>
               </Button>
               <Button className="min-w-0" variant="outline" disabled={!displaySchedule || isExporting} onClick={() => setIsDownloadMenuOpen(true)}>
                 <Download className="h-4 w-4" />
-                <span className="truncate">Download</span>
+                <span className="min-w-0 truncate">Download</span>
               </Button>
               <Button className="min-w-0" variant="outline" onClick={handleResetSession}>
                 <RotateCcw className="h-4 w-4" />
-                <span className="truncate">Reset Session</span>
+                <span className="min-w-0 truncate">Reset Session</span>
               </Button>
-              <Button className="col-span-2 min-w-0 sm:col-span-2 xl:col-span-1" variant="outline" disabled={schedules.length <= 1} onClick={handleGenerateAnother}>
+              <Button className="col-span-2 min-w-0" variant="outline" disabled={schedules.length <= 1} onClick={handleGenerateAnother}>
                 <RefreshCw className="h-4 w-4" />
-                <span className="truncate">Generate New</span>
+                <span className="min-w-0 truncate">Generate New</span>
               </Button>
             </div>
           </div>
