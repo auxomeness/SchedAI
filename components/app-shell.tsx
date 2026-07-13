@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
-import { AlertCircle, CalendarCheck2, Download, FileDown, Lock, Moon, Plus, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
+import { AlertCircle, CalendarCheck2, Download, Eye, Facebook, FileDown, Github, Linkedin, Lock, Moon, Plus, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { ManualSubjectForm } from "@/components/manual-subject-form";
@@ -44,6 +44,7 @@ export function AppShell() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isDownloadMenuOpen, setIsDownloadMenuOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [hasRestoredSession, setHasRestoredSession] = useState(false);
 
   useEffect(() => {
@@ -197,6 +198,7 @@ export function AppShell() {
     setIsParsing(false);
     setIsDarkMode(false);
     setIsDownloadMenuOpen(false);
+    setIsPreviewOpen(false);
   }
 
   async function handleExport(format: "png" | "pdf") {
@@ -321,8 +323,14 @@ export function AppShell() {
           {error ? <FeedbackCard title="File could not be read" items={[{ message: error, suggestion: "Try a text-based PDF, CSV, or Excel file with subject, day, and time columns." }]} /> : null}
           {reasons.length > 0 ? <FeedbackCard title="Unable to generate a schedule" items={reasons} /> : null}
           {displaySchedule ? (
-            <div>
+            <div className="space-y-3">
               <ScheduleTimetable ref={timetableRef} schedule={displaySchedule} frozenSchedules={frozenSchedules} />
+              <div className="flex justify-end">
+                <Button type="button" variant="outline" onClick={() => setIsPreviewOpen(true)}>
+                  <Eye className="h-4 w-4" />
+                  Preview
+                </Button>
+              </div>
             </div>
           ) : (
             <EmptyState />
@@ -356,6 +364,27 @@ export function AppShell() {
           </Card>
         </div>
       ) : null}
+      {isPreviewOpen && displaySchedule ? (
+        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/75 p-12 backdrop-blur-xl">
+          <div className="flex max-h-[88vh] w-full max-w-7xl flex-col rounded-2xl border bg-card text-card-foreground shadow-2xl">
+            <div className="flex items-center justify-between gap-4 border-b p-5">
+              <div className="flex min-w-0 items-center gap-3">
+                <img src="/arxeni.png" alt="Arxeni" className="hidden h-8 w-auto object-contain dark:invert sm:block" />
+                <div>
+                  <h2 className="text-lg font-semibold">Schedule preview</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">{selectedSummary}</p>
+                </div>
+              </div>
+              <Button type="button" variant="ghost" size="sm" onClick={() => setIsPreviewOpen(false)} aria-label="Close schedule preview">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="overflow-auto p-5">
+              <ScheduleTimetable schedule={displaySchedule} frozenSchedules={frozenSchedules} />
+            </div>
+          </div>
+        </div>
+      ) : null}
       <footer className="-mx-4 -mb-6 mt-12 bg-[#050607] px-4 py-14 text-slate-400 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(220px,0.76fr)_minmax(520px,1.6fr)]">
           <div className="grid content-start gap-5">
@@ -372,7 +401,14 @@ export function AppShell() {
             <FooterColumn title="Explore" links={["Workspace", "Upload", "Subjects", "Preferences"]} />
             <FooterColumn title="Product" links={["Schedule Generator", "PNG Export", "PDF Export", "Frozen Schedules"]} />
             <FooterColumn title="More from Arxeni" links={["Expy", "Lumen", "APOS Web", "APOS Mobile", "ProxiFix"]} />
-            <FooterColumn title="Follow" links={["Facebook", "LinkedIn"]} />
+            <FooterColumn
+              title="Follow"
+              links={[
+                { label: "GitHub", href: "https://github.com/auxomeness", icon: Github },
+                { label: "LinkedIn", href: "https://www.linkedin.com/in/karlaustinpavia", icon: Linkedin },
+                { label: "Facebook", href: "https://www.facebook.com/karlaustin.pavia", icon: Facebook }
+              ]}
+            />
             <FooterColumn title="Legal" links={["Terms", "Privacy"]} />
             <p className="border-t border-white/10 pt-5 text-sm leading-7 sm:col-span-2 lg:col-span-5">
               SchedAI helps compare personal schedule options. Always verify your final schedule with your school.
@@ -414,15 +450,28 @@ function buildSelectedSectionIdsFromPreferred(
   }, {});
 }
 
-function FooterColumn({ title, links }: { title: string; links: string[] }) {
+type FooterLink = string | {
+  label: string;
+  href: string;
+  icon?: React.ComponentType<{ className?: string }>;
+};
+
+function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) {
   return (
     <nav className="grid content-start gap-2">
       <span className="mb-1 text-xs font-extrabold text-slate-200">{title}</span>
-      {links.map((link) => (
-        <a key={link} href="#" className="w-fit text-sm font-semibold text-slate-500 hover:text-slate-100 hover:underline">
-          {link}
+      {links.map((link) => {
+        const label = typeof link === "string" ? link : link.label;
+        const href = typeof link === "string" ? "#" : link.href;
+        const Icon = typeof link === "string" ? undefined : link.icon;
+
+        return (
+        <a key={label} href={href} target={href === "#" ? undefined : "_blank"} rel={href === "#" ? undefined : "noreferrer"} className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-100 hover:underline">
+          {Icon ? <Icon className="h-4 w-4" /> : null}
+          {label}
         </a>
-      ))}
+        );
+      })}
     </nav>
   );
 }
