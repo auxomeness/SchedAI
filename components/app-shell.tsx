@@ -25,7 +25,7 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   breaks: [],
   preferCompact: true
 };
-const APP_VERSION = "0.2.1";
+const APP_VERSION = "0.2.2";
 
 export function AppShell() {
   const timetableRef = useRef<HTMLDivElement>(null);
@@ -234,19 +234,19 @@ export function AppShell() {
   }
 
   return (
-    <main className="flex min-h-screen w-full max-w-none flex-col gap-8 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8">
-      <header className="sticky top-4 z-20 mx-auto flex h-auto w-full max-w-7xl flex-col gap-3 rounded-[24px] border border-white/50 bg-white/30 px-5 py-3 shadow-[inset_0_1px_rgba(255,255,255,0.65),0_18px_52px_rgba(31,38,46,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-black/50 sm:h-[62px] sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:py-2">
+    <main className="flex min-h-screen w-full max-w-none flex-col gap-8 overflow-x-hidden px-3 py-5 sm:px-6 lg:px-8">
+      <header className="sticky top-4 z-20 mx-auto flex h-auto w-full max-w-7xl flex-col gap-3 rounded-[24px] border border-white/50 bg-white/30 px-4 py-4 shadow-[inset_0_1px_rgba(255,255,255,0.65),0_18px_52px_rgba(31,38,46,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-black/50 sm:h-[62px] sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:px-5 sm:py-2">
         <a href="#" className="inline-flex items-baseline gap-1 text-xl font-extrabold tracking-tight">
           <span>SchedAI</span>
           <span className="font-normal text-muted-foreground">by Arxeni</span>
         </a>
         <div className="hidden text-sm font-semibold text-muted-foreground sm:block">Workspace</div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="secondary" onClick={() => setIsDarkMode((value) => !value)}>
+        <div className="grid w-full grid-cols-2 items-center gap-2 sm:flex sm:w-auto sm:flex-wrap">
+          <Button className="min-w-0" variant="secondary" onClick={() => setIsDarkMode((value) => !value)}>
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             {isDarkMode ? "Light" : "Dark"}
           </Button>
-          <Button disabled={!canGenerate} onClick={handleGenerate}>
+          <Button className="min-w-0" disabled={!canGenerate} onClick={handleGenerate}>
             <CalendarCheck2 className="h-4 w-4" />
             Generate
           </Button>
@@ -256,7 +256,7 @@ export function AppShell() {
       <div className="grid gap-6 lg:grid-cols-[460px_minmax(0,1fr)]">
         <section className="space-y-5">
           <div className="space-y-3 rounded-2xl border bg-white/70 p-3 shadow-sm dark:bg-[#050505]/90">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
               <div className="rounded-xl border bg-white/70 px-3 py-2 text-sm text-muted-foreground dark:bg-[#050505]/90">
                 {selectedSummary}
               </div>
@@ -266,26 +266,26 @@ export function AppShell() {
                 </div>
               ) : null}
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button className="flex-1" variant="outline" disabled={!currentSchedule} onClick={handleMarkComplete}>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
+              <Button className="min-w-0" variant="outline" disabled={!currentSchedule} onClick={handleMarkComplete}>
                 <Lock className="h-4 w-4" />
-                Complete
+                <span className="truncate">Complete</span>
               </Button>
-              <Button className="flex-1" variant="outline" disabled={frozenSchedules.length === 0} onClick={handleNewSchedule}>
+              <Button className="min-w-0" variant="outline" disabled={frozenSchedules.length === 0} onClick={handleNewSchedule}>
                 <Plus className="h-4 w-4" />
-                New
+                <span className="truncate">New</span>
               </Button>
-              <Button className="flex-1" variant="outline" disabled={!displaySchedule || isExporting} onClick={() => setIsDownloadMenuOpen(true)}>
+              <Button className="min-w-0" variant="outline" disabled={!displaySchedule || isExporting} onClick={() => setIsDownloadMenuOpen(true)}>
                 <Download className="h-4 w-4" />
-                Download
+                <span className="truncate">Download</span>
               </Button>
-              <Button className="flex-1" variant="outline" onClick={handleResetSession}>
+              <Button className="min-w-0" variant="outline" onClick={handleResetSession}>
                 <RotateCcw className="h-4 w-4" />
-                Reset Session
+                <span className="truncate">Reset Session</span>
               </Button>
-              <Button className="flex-1" variant="outline" disabled={schedules.length <= 1} onClick={handleGenerateAnother}>
+              <Button className="col-span-2 min-w-0 sm:col-span-2 xl:col-span-1" variant="outline" disabled={schedules.length <= 1} onClick={handleGenerateAnother}>
                 <RefreshCw className="h-4 w-4" />
-                Generate New
+                <span className="truncate">Generate New</span>
               </Button>
             </div>
           </div>
@@ -386,7 +386,7 @@ export function AppShell() {
           </div>
         </div>
       ) : null}
-      <footer className="-mx-4 -mb-6 mt-12 bg-[#050607] px-4 py-14 text-slate-400 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <footer className="-mx-3 -mb-5 mt-12 bg-[#050607] px-4 py-14 text-slate-400 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,0.76fr)_minmax(0,1.6fr)]">
           <div className="grid content-start gap-5">
             <img src="/arxeni.png" alt="Arxeni" className="w-40 max-w-full object-contain sm:w-48" />

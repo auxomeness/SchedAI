@@ -22,6 +22,7 @@ const DAY_ALIASES: Record<string, Weekday> = {
   F: "FRI",
   FRI: "FRI",
   FRIDAY: "FRI",
+  S: "SAT",
   SA: "SAT",
   SAT: "SAT",
   SATURDAY: "SAT",

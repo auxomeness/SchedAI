@@ -149,7 +149,7 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <FileUp className="h-5 w-5 shrink-0 text-foreground" />
-              <div>
+              <div className="min-w-0">
                 <CardTitle>Upload schedule file</CardTitle>
                 <CardDescription>PDF, CSV, or Excel. Text-based files work best.</CardDescription>
               </div>
@@ -170,20 +170,20 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
           <label className="block">
             <span className="sr-only">Choose schedule file</span>
             <Input className="hidden" accept=".pdf,.csv,.xlsx,.xls" disabled={isParsing} type="file" onChange={handleFileChange} />
-            <span className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-3 text-sm font-medium transition-colors dark:bg-[#050505]/90 ${isPageDragging ? "border-foreground bg-secondary" : "bg-white/70 hover:bg-secondary/70"}`}>
+            <span className={`flex min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-3 text-sm font-medium transition-colors dark:bg-[#050505]/90 ${isPageDragging ? "border-foreground bg-secondary" : "bg-white/70 hover:bg-secondary/70"}`}>
               {fileName ? <Paperclip className="h-4 w-4" /> : <FileUp className="h-4 w-4" />}
-              {isPageDragging ? "Drop file anywhere to upload" : fileName ? "Replace attached file" : "Choose or drag schedule file"}
+              <span className="truncate">{isPageDragging ? "Drop file anywhere to upload" : fileName ? "Replace attached file" : "Choose or drag schedule file"}</span>
             </span>
           </label>
-          <div className="flex min-h-5 items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex min-h-5 min-w-0 items-center gap-2 text-sm text-muted-foreground">
             {isParsing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Reading file...
               </>
             ) : fileName ? (
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="inline-flex min-w-0 items-center gap-2 rounded-full border bg-card px-3 py-1 text-foreground">
+              <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+                <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden rounded-full border bg-card px-3 py-1 text-foreground">
                   <FileCheck2 className="h-4 w-4 shrink-0" />
                   <span className="truncate">{fileName} attached</span>
                 </span>
