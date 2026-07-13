@@ -410,7 +410,13 @@ export function AppShell() {
                 { label: "Instagram", href: "https://www.instagram.com/thatguyaustinn/", icon: Instagram }
               ]}
             />
-            <FooterColumn title="Legal" links={["Terms", "Privacy"]} />
+            <FooterColumn
+              title="Legal"
+              links={[
+                { label: "Terms", href: "/terms" },
+                { label: "Privacy", href: "/privacy" }
+              ]}
+            />
             <p className="border-t border-white/10 pt-5 text-sm leading-7 sm:col-span-2 lg:col-span-5">
               SchedAI helps compare personal schedule options. Always verify your final schedule with your school.
             </p>
@@ -466,11 +472,13 @@ function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) 
         const href = typeof link === "string" ? "#" : link.href;
         const Icon = typeof link === "string" ? undefined : link.icon;
 
+        const isExternal = href.startsWith("http");
+
         return (
-        <a key={label} href={href} target={href === "#" ? undefined : "_blank"} rel={href === "#" ? undefined : "noreferrer"} className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-100 hover:underline">
-          {Icon ? <Icon className="h-4 w-4" /> : null}
-          {label}
-        </a>
+          <a key={label} href={href} target={isExternal ? "_blank" : undefined} rel={isExternal ? "noreferrer" : undefined} className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-100 hover:underline">
+            {Icon ? <Icon className="h-4 w-4" /> : null}
+            {label}
+          </a>
         );
       })}
     </nav>
