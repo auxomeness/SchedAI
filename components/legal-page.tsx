@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { LegalSectionNav } from "@/components/legal-section-nav";
 
 interface LegalSection {
   id: string;
@@ -56,8 +55,17 @@ export function LegalPage({ eyebrow, title, intro, documentTitle, documentSummar
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[300px_1fr]">
-        <LegalSectionNav sections={sections.map(({ id, title }) => ({ id, title }))} />
+      <section className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[240px_1fr]">
+        <aside className="lg:sticky lg:top-8 lg:h-fit">
+          <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Sections</p>
+          <nav className="mt-4 grid gap-3 text-sm font-semibold text-muted-foreground">
+            {sections.map((section) => (
+              <a key={section.id} href={`#${section.id}`} className="hover:text-foreground">
+                {section.title}
+              </a>
+            ))}
+          </nav>
+        </aside>
 
         <div className="divide-y">
           {sections.map((section) => (
