@@ -91,6 +91,10 @@ function splitTimeRange(value: string): [string, string] | undefined {
   return [start, end];
 }
 
+function isSectionToken(value: string): boolean {
+  return /^[A-Z]{1,6}\d{1,4}[A-Z]{0,4}$/i.test(value) || /^[A-Z]{2,6}\d?[A-Z]{0,3}$/i.test(value);
+}
+
 function inferCodeAndSection(parts: string[]): { code?: string; section?: string; index: number; nextIndex: number } {
   const codeIndex = parts.findIndex((part) => /^[A-Z]{2,5}\d{3}[A-Z]?$/.test(part));
   if (codeIndex === -1) return { index: -1, nextIndex: -1 };
@@ -100,6 +104,47 @@ function inferCodeAndSection(parts: string[]): { code?: string; section?: string
     return { code: parts[codeIndex], index: codeIndex, nextIndex: codeIndex + 1 };
   }
 
+  const secondToken = parts[codeIndex + 2];
+  const thirdToken = parts[codeIndex + 3];
+  const splitThreePartSection =
+    /^[A-Z]{1,6}$/i.test(sectionToken) &&
+    /^\d{1,4}$/.test(secondToken ?? "") &&
+    /^[A-Z]{1,4}$/i.test(thirdToken ?? "");
+  if (splitThreePartSection) {
+    return {
+      code: parts[codeIndex],
+      section: `${sectionToken}${secondToken}${thirdToken}`,
+      index: codeIndex,
+      nextIndex: codeIndex + 4
+    };
+  }
+
+  const splitTwoPartSection =
+    /^[A-Z]{1,6}\d{1,4}$/i.test(sectionToken) &&
+    /^[A-Z]{1,4}$/i.test(secondToken ?? "") &&
+    isSectionToken(`${sectionToken}${secondToken}`);
+  if (splitTwoPartSection) {
+    return {
+      code: parts[codeIndex],
+      section: `${sectionToken}${secondToken}`,
+      index: codeIndex,
+      nextIndex: codeIndex + 3
+    };
+  }
+
+  const splitLetterNumberSection =
+    /^[A-Z]{1,6}$/i.test(sectionToken) &&
+    /^\d{1,4}$/.test(secondToken ?? "") &&
+    isSectionToken(`${sectionToken}${secondToken}`);
+  if (splitLetterNumberSection) {
+    return {
+      code: parts[codeIndex],
+      section: `${sectionToken}${secondToken}`,
+      index: codeIndex,
+      nextIndex: codeIndex + 3
+    };
+  }
+
   const suffixToken = parts[codeIndex + 2];
   const section = suffixToken && /^[A-Z][a-z]?$/.test(suffixToken) ? `${sectionToken}${suffixToken}` : sectionToken;
   return {
@@ -107,6 +152,57 @@ function inferCodeAndSection(parts: string[]): { code?: string; section?: string
     section,
     index: codeIndex,
     nextIndex: codeIndex + (suffixToken && /^[A-Z][a-z]?$/.test(suffixToken) ? 3 : 2)
+  };
+}
+
+function normalizeDayCandidate(value: string): string {
+  return value
+    .toUpperCase()
+    .replace(/[–—]/g, "-")
+    .replace(/\./g, "")
+    .replace(/\s*-\s*/g, "-")
+    .trim();
+}
+
+function isDayCandidate(value: string): boolean {
+  return parseDays(normalizeDayCandidate(value)).length > 0;
+}
+
+function extractPdfTail(tailText: string): { days: string; room: string; professor: string } {
+  const tokens = tailText
+    .replace(/[–—]/g, "-")
+    .replace(/\s*-\s*/g, "-")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  let dayIndex = -1;
+  let dayLength = 0;
+
+  for (let index = 0; index < tokens.length; index += 1) {
+    for (let length = 3; length >= 1; length -= 1) {
+      const candidate = tokens.slice(index, index + length).join("");
+      if (!isDayCandidate(candidate)) continue;
+      dayIndex = index;
+      dayLength = length;
+      break;
+    }
+    if (dayIndex >= 0) break;
+  }
+
+  if (dayIndex < 0) return { days: "", room: "", professor: "" };
+
+  const days = normalizeDayCandidate(tokens.slice(dayIndex, dayIndex + dayLength).join(""));
+  const afterDays = tokens.slice(dayIndex + dayLength);
+  const room = afterDays.find((token) => !/^\d+(?:\.\d+)?$/.test(token)) ?? "";
+  const roomIndex = room ? afterDays.indexOf(room) : -1;
+  const afterRoom = roomIndex >= 0 ? afterDays.slice(roomIndex + 1) : afterDays;
+  const professorParts = afterRoom.filter((token) => !/^\d+(?:\.\d+)?$/.test(token));
+
+  return {
+    days,
+    room,
+    professor: professorParts.join(" ")
   };
 }
 
@@ -168,9 +264,8 @@ export function normalizePdfText(text: string): ParseResult {
     if (!range) return;
 
     if (!inferred.code && previousIndex >= 0) {
-      const tail = line.slice(line.indexOf(range[1]) + range[1].length).trim().split(" ");
-      const dayToken = tail.find((token) => parseDays(token).length > 0) ?? "";
-      const meetings = buildMeetings(dayToken, range[0], range[1]);
+      const tail = extractPdfTail(line.slice(line.indexOf(range[1]) + range[1].length));
+      const meetings = buildMeetings(tail.days, range[0], range[1]);
       sections[previousIndex] = {
         ...sections[previousIndex],
         meetings: [...sections[previousIndex].meetings, ...meetings]
@@ -184,20 +279,16 @@ export function normalizePdfText(text: string): ParseResult {
     const titleEnd = afterCode.search(/\s\d+\.0\s+\d+\.0/);
     const subjectName = titleEnd > 0 ? afterCode.slice(0, titleEnd) : afterCode.slice(0, 60);
     const timeEndIndex = line.indexOf(range[1]) + range[1].length;
-    const tail = line.slice(timeEndIndex).trim().split(" ");
-    const dayToken = tail.find((token) => parseDays(token).length > 0) ?? "";
-    const dayIndex = tail.indexOf(dayToken);
-    const room = dayIndex >= 0 && tail[dayIndex + 1] && !/^\d+$/.test(tail[dayIndex + 1]) ? tail[dayIndex + 1] : "";
-    const professorParts = tail.slice(dayIndex + (room ? 2 : 1)).filter((token) => !/^\d+$/.test(token));
+    const tail = extractPdfTail(line.slice(timeEndIndex));
 
     const normalized = normalizeSection(
       {
         subjectCode: inferred.code,
         subjectName,
         section: inferred.section,
-        professor: professorParts.join(" "),
-        room,
-        meetings: buildMeetings(dayToken, range[0], range[1])
+        professor: tail.professor,
+        room: tail.room,
+        meetings: buildMeetings(tail.days, range[0], range[1])
       },
       index
     );

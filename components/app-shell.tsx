@@ -25,7 +25,7 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   breaks: [],
   preferCompact: true
 };
-const APP_VERSION = "0.2.0";
+const APP_VERSION = "0.2.1";
 
 export function AppShell() {
   const timetableRef = useRef<HTMLDivElement>(null);

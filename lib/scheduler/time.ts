@@ -1,6 +1,7 @@
 import type { Meeting, Weekday } from "@/types/schedule";
 
 export const DAYS: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const RANGE_DAYS: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 const DAY_ALIASES: Record<string, Weekday> = {
   M: "MON",
@@ -59,7 +60,37 @@ export function formatMinutes(minutes: number): string {
 }
 
 export function parseDays(value: string): Weekday[] {
-  const normalized = value.toUpperCase().replace(/[^A-Z]/g, "");
+  const raw = value
+    .toUpperCase()
+    .replace(/[–—]/g, "-")
+    .replace(/\./g, "")
+    .replace(/\s*-\s*/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!raw) return [];
+
+  const rangeMatch = raw.match(/^([A-Z]+)-([A-Z]+)$/);
+  if (rangeMatch) {
+    const start = DAY_ALIASES[rangeMatch[1]];
+    const end = DAY_ALIASES[rangeMatch[2]];
+    if (start && end) {
+      const startIndex = RANGE_DAYS.indexOf(start);
+      const endIndex = RANGE_DAYS.indexOf(end);
+      if (startIndex >= 0 && endIndex >= startIndex) {
+        return RANGE_DAYS.slice(startIndex, endIndex + 1);
+      }
+    }
+  }
+
+  if (/[,\s/&]+/.test(raw)) {
+    const splitDays = raw
+      .split(/[,\s/&]+/)
+      .flatMap((part) => parseDays(part))
+      .filter(Boolean);
+    if (splitDays.length) return Array.from(new Set(splitDays));
+  }
+
+  const normalized = raw.replace(/[^A-Z]/g, "");
   if (!normalized) return [];
 
   if (normalized === "TTH") return ["TUE", "THU"];
