@@ -1,7 +1,7 @@
 "use client";
 
-import type { ChangeEvent, DragEvent } from "react";
-import { useState } from "react";
+import type { ChangeEvent } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FileCheck2, FileSpreadsheet, FileText, FileUp, HelpCircle, Loader2, Paperclip, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,9 +28,9 @@ const acceptedColumns = ["Subject Code", "Subject Name", "Section", "Days", "Sta
 
 export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onRemove, fileName }: UploadPanelProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
+  const [isPageDragging, setIsPageDragging] = useState(false);
 
-  async function parseFile(file: File) {
+  const parseFile = useCallback(async (file: File) => {
     onParsingChange(true);
     onError("");
 
@@ -42,7 +42,7 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
     } finally {
       onParsingChange(false);
     }
-  }
+  }, [onError, onParsed, onParsingChange]);
 
   async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -55,23 +55,50 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
     }
   }
 
-  function handleDragOver(event: DragEvent<HTMLLabelElement>) {
-    event.preventDefault();
-    if (!isParsing) setIsDragging(true);
-  }
+  useEffect(() => {
+    function hasDraggedFiles(event: DragEvent) {
+      return Array.from(event.dataTransfer?.types ?? []).includes("Files");
+    }
 
-  function handleDragLeave(event: DragEvent<HTMLLabelElement>) {
-    event.preventDefault();
-    setIsDragging(false);
-  }
+    function handleWindowDragOver(event: DragEvent) {
+      if (!hasDraggedFiles(event)) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+      if (!isParsing) setIsPageDragging(true);
+    }
 
-  async function handleDrop(event: DragEvent<HTMLLabelElement>) {
-    event.preventDefault();
-    setIsDragging(false);
-    const file = event.dataTransfer.files?.[0];
-    if (!file || isParsing) return;
-    await parseFile(file);
-  }
+    function handleWindowDragLeave(event: DragEvent) {
+      if (!hasDraggedFiles(event)) return;
+      if (event.clientX <= 0 || event.clientY <= 0 || event.clientX >= window.innerWidth || event.clientY >= window.innerHeight) {
+        setIsPageDragging(false);
+      }
+    }
+
+    async function handleWindowDrop(event: DragEvent) {
+      if (!hasDraggedFiles(event)) return;
+      event.preventDefault();
+      setIsPageDragging(false);
+      const file = event.dataTransfer?.files?.[0];
+      if (!file || isParsing) return;
+      await parseFile(file);
+    }
+
+    function handleWindowDragEnd() {
+      setIsPageDragging(false);
+    }
+
+    window.addEventListener("dragover", handleWindowDragOver);
+    window.addEventListener("dragleave", handleWindowDragLeave);
+    window.addEventListener("drop", handleWindowDrop);
+    window.addEventListener("dragend", handleWindowDragEnd);
+
+    return () => {
+      window.removeEventListener("dragover", handleWindowDragOver);
+      window.removeEventListener("dragleave", handleWindowDragLeave);
+      window.removeEventListener("drop", handleWindowDrop);
+      window.removeEventListener("dragend", handleWindowDragEnd);
+    };
+  }, [isParsing, parseFile]);
 
   return (
     <>
@@ -98,12 +125,12 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          <label className="block" onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+          <label className="block">
             <span className="sr-only">Choose schedule file</span>
             <Input className="hidden" accept=".pdf,.csv,.xlsx,.xls" disabled={isParsing} type="file" onChange={handleFileChange} />
-            <span className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-3 text-sm font-medium transition-colors dark:bg-[#050505]/90 ${isDragging ? "border-foreground bg-secondary" : "bg-white/70 hover:bg-secondary/70"}`}>
+            <span className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-3 text-sm font-medium transition-colors dark:bg-[#050505]/90 ${isPageDragging ? "border-foreground bg-secondary" : "bg-white/70 hover:bg-secondary/70"}`}>
               {fileName ? <Paperclip className="h-4 w-4" /> : <FileUp className="h-4 w-4" />}
-              {isDragging ? "Drop file to upload" : fileName ? "Replace attached file" : "Choose or drag schedule file"}
+              {isPageDragging ? "Drop file anywhere to upload" : fileName ? "Replace attached file" : "Choose or drag schedule file"}
             </span>
           </label>
           <div className="flex min-h-5 items-center gap-2 text-sm text-muted-foreground">
@@ -130,6 +157,16 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
           </div>
         </CardContent>
       </Card>
+
+      {isPageDragging ? (
+        <div className="pointer-events-none fixed -inset-8 z-[9998] grid place-items-center bg-black/50 p-12 backdrop-blur-lg">
+          <div className="rounded-2xl border bg-card px-6 py-5 text-center text-card-foreground shadow-2xl">
+            <FileUp className="mx-auto h-7 w-7" />
+            <p className="mt-3 text-sm font-extrabold">Drop schedule file to upload</p>
+            <p className="mt-1 text-xs text-muted-foreground">PDF, CSV, XLSX, or XLS</p>
+          </div>
+        </div>
+      ) : null}
 
       {isHelpOpen ? (
         <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/70 p-12 backdrop-blur-xl" role="dialog" aria-modal="true" aria-labelledby="import-help-title">

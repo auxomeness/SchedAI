@@ -25,14 +25,40 @@ function findTableHeaderLine(lines: PdfLine[]): PdfLine | undefined {
   });
 }
 
+function extractHeaderItems(line: PdfLine): Array<PdfTextItem & { normalized: string }> {
+  const items = [...line.items].sort((a, b) => a.x - b.x);
+  const result: Array<PdfTextItem & { normalized: string }> = [];
+  let cursor = 0;
+
+  TABLE_HEADERS.forEach((header) => {
+    const expected = cleanHeader(header);
+
+    for (let index = cursor; index < items.length; index += 1) {
+      for (let length = 1; length <= 3 && index + length <= items.length; length += 1) {
+        const slice = items.slice(index, index + length);
+        const normalized = cleanHeader(slice.map((item) => item.str).join(" "));
+        if (normalized !== expected) continue;
+
+        result.push({
+          str: header,
+          x: slice[0].x,
+          y: slice[0].y,
+          normalized: expected
+        });
+        cursor = index + length;
+        return;
+      }
+    }
+  });
+
+  return result;
+}
+
 function buildStructuredRowsFromTable(lines: PdfLine[]): Record<string, string>[] {
   const headerLine = findTableHeaderLine(lines);
   if (!headerLine) return [];
 
-  const headerItems = headerLine.items
-    .map((item) => ({ ...item, normalized: cleanHeader(item.str) }))
-    .filter((item) => TABLE_HEADERS.some((header) => cleanHeader(header) === item.normalized))
-    .sort((a, b) => a.x - b.x);
+  const headerItems = extractHeaderItems(headerLine).sort((a, b) => a.x - b.x);
 
   if (headerItems.length < 6) return [];
 

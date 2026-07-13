@@ -20,10 +20,46 @@ function cleanHeader(value: string): string {
   return value.toLowerCase().replace(/\s+/g, " ").replace(/[^a-z0-9. ]/g, "").trim();
 }
 
+function isTimeField(key: CanonicalField): boolean {
+  return key === "startTime" || key === "endTime" || key === "time";
+}
+
+function formatMinutesAsTime(minutes: number): string {
+  const normalized = ((minutes % 1440) + 1440) % 1440;
+  const hour24 = Math.floor(normalized / 60);
+  const minute = normalized % 60;
+  const period = hour24 >= 12 ? "PM" : "AM";
+  const hour = hour24 % 12 || 12;
+  return `${hour}:${minute.toString().padStart(2, "0")} ${period}`;
+}
+
+function formatExcelTimeNumber(value: number): string {
+  const fraction = ((value % 1) + 1) % 1;
+  if (fraction === 0 && value !== 0) return String(value);
+  return formatMinutesAsTime(Math.round(fraction * 1440));
+}
+
+function stringifyCellValue(value: unknown, key: CanonicalField): string {
+  if (value === undefined || value === null) return "";
+  if (value instanceof Date && isTimeField(key)) {
+    return formatMinutesAsTime(value.getHours() * 60 + value.getMinutes());
+  }
+  if (typeof value === "number" && isTimeField(key)) {
+    return formatExcelTimeNumber(value);
+  }
+
+  const text = String(value).trim();
+  if (isTimeField(key) && /^-?\d+(?:\.\d+)?$/.test(text)) {
+    return formatExcelTimeNumber(Number(text));
+  }
+
+  return text;
+}
+
 function getString(row: Row, headerMap: Map<CanonicalField, string>, key: CanonicalField): string {
   const header = headerMap.get(key);
   const value = header ? row[header] : undefined;
-  return value === undefined || value === null ? "" : String(value).trim();
+  return stringifyCellValue(value, key);
 }
 
 function createHeaderMap(headers: string[]): Map<CanonicalField, string> {

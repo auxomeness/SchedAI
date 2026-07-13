@@ -6,7 +6,7 @@ export async function parseXlsxFile(file: File): Promise<ParseResult> {
   const buffer = await file.arrayBuffer();
   const workbook = XLSX.read(buffer, { type: "array" });
   const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet, { defval: "" });
+  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet, { defval: "", raw: false });
   const parsed = normalizeStructuredRows(rows);
 
   if (!hasUsableScheduleData(parsed)) {
