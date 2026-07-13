@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Download, FileSpreadsheet, FileText } from "lucide-react";
+import { Download, FileSpreadsheet, FileText, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -110,6 +110,19 @@ export default function ImportsPage() {
                 </span>
               ))}
             </div>
+          </section>
+
+          <section className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+              <Link2 className="h-5 w-5" />
+            </div>
+            <h2 className="mt-5 text-2xl font-black tracking-tight">Google links</h2>
+            <p className="mt-3 text-base leading-8 text-muted-foreground">
+              You can paste a normal Google Sheets or Google Docs link in the workspace. Share the file as "Anyone with the link can view" before importing.
+            </p>
+            <p className="mt-3 text-base leading-8 text-muted-foreground">
+              Google Sheets is recommended because SchedAI can export it as CSV. Google Docs import is beta and works best with a simple text table.
+            </p>
           </section>
 
           <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">

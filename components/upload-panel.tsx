@@ -2,7 +2,7 @@
 
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { FileCheck2, FileSpreadsheet, FileText, FileUp, HelpCircle, Loader2, Paperclip, X } from "lucide-react";
+import { FileCheck2, FileSpreadsheet, FileText, FileUp, HelpCircle, Link2, Loader2, Paperclip, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,9 @@ const acceptedColumns = ["Subject Code", "Subject Name", "Section", "Days", "Sta
 
 export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onRemove, fileName }: UploadPanelProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isGoogleImportOpen, setIsGoogleImportOpen] = useState(false);
+  const [googleUrl, setGoogleUrl] = useState("");
+  const [googleError, setGoogleError] = useState("");
   const [isPageDragging, setIsPageDragging] = useState(false);
 
   const parseFile = useCallback(async (file: File) => {
@@ -52,6 +55,44 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
       await parseFile(file);
     } finally {
       event.target.value = "";
+    }
+  }
+
+  async function handleGoogleImport() {
+    const trimmedUrl = googleUrl.trim();
+    if (!trimmedUrl || isParsing) return;
+
+    onParsingChange(true);
+    onError("");
+    setGoogleError("");
+
+    try {
+      const response = await fetch("/api/import/google", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({ url: trimmedUrl })
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => undefined)) as { error?: string } | undefined;
+        throw new Error(payload?.error ?? "We could not import this Google file.");
+      }
+
+      const blob = await response.blob();
+      const fileName = response.headers.get("x-schedai-filename") ?? "google-import.csv";
+      const file = new File([blob], fileName, { type: response.headers.get("content-type") ?? blob.type });
+      const result = await parseScheduleFile(file);
+      onParsed(result, file.name);
+      setGoogleUrl("");
+      setIsGoogleImportOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "We could not import this Google file.";
+      setGoogleError(message);
+      onError(message);
+    } finally {
+      onParsingChange(false);
     }
   }
 
@@ -155,6 +196,10 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
               <>No file loaded yet.</>
             )}
           </div>
+          <Button type="button" variant="outline" className="w-full" onClick={() => setIsGoogleImportOpen(true)}>
+            <Link2 className="h-4 w-4" />
+            Import from Google link
+          </Button>
         </CardContent>
       </Card>
 
@@ -201,6 +246,7 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
                   Professor Name, Room / Online.
                 </p>
                 <p className="mt-2">PDF files must be text-based. Scanned image PDFs may not parse correctly.</p>
+                <p className="mt-2">For Google links, share the file as "Anyone with the link can view" before importing.</p>
               </div>
               <div className="grid gap-2 sm:grid-cols-3">
                 {templateDownloads.map(({ label, href, icon: Icon }) => (
@@ -215,6 +261,64 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
               <a href="/imports" className="inline-flex text-sm font-semibold text-foreground underline-offset-4 hover:underline">
                 View full import guide
               </a>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isGoogleImportOpen ? (
+        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/70 p-12 backdrop-blur-xl" role="dialog" aria-modal="true" aria-labelledby="google-import-title">
+          <div className="w-full max-w-xl rounded-2xl border bg-card text-card-foreground shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b p-5">
+              <div>
+                <h2 id="google-import-title" className="text-lg font-extrabold">
+                  Import from Google
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  Paste a Google Sheets or Google Docs link shared as "Anyone with the link can view."
+                </p>
+              </div>
+              <Button type="button" variant="ghost" size="sm" className="h-9 w-9 rounded-full p-0" onClick={() => setIsGoogleImportOpen(false)} aria-label="Close Google import">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="space-y-4 p-5">
+              <div className="space-y-2">
+                <label htmlFor="google-import-url" className="text-sm font-semibold">
+                  Google link
+                </label>
+                <Input
+                  id="google-import-url"
+                  value={googleUrl}
+                  onChange={(event) => {
+                    setGoogleUrl(event.target.value);
+                    setGoogleError("");
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") void handleGoogleImport();
+                  }}
+                  placeholder="https://docs.google.com/spreadsheets/d/..."
+                  disabled={isParsing}
+                />
+              </div>
+              <div className="rounded-xl border bg-secondary/50 p-4 text-sm leading-7 text-muted-foreground">
+                <p>Google Sheets is recommended because it exports clean CSV data.</p>
+                <p className="mt-2">Google Docs support is beta and works best when the document contains a simple text table.</p>
+              </div>
+              {googleError ? (
+                <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {googleError}
+                </p>
+              ) : null}
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button type="button" variant="outline" onClick={() => setIsGoogleImportOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="button" disabled={!googleUrl.trim() || isParsing} onClick={handleGoogleImport}>
+                  {isParsing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+                  Import link
+                </Button>
+              </div>
             </div>
           </div>
         </div>
