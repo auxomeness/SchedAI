@@ -38,12 +38,12 @@ export default function ImportsPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <header className="border-b bg-white/80 backdrop-blur-xl dark:bg-black/80">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
+        <div className="mx-auto flex min-h-20 max-w-7xl flex-col items-start justify-center gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-0">
           <Link href="/" className="inline-flex items-baseline gap-1 text-2xl font-extrabold tracking-tight">
             <span>SchedAI</span>
             <span className="font-normal text-muted-foreground">by Arxeni</span>
           </Link>
-          <nav className="flex items-center gap-6 text-sm font-semibold text-muted-foreground">
+          <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-muted-foreground sm:gap-6">
             <Link href="/terms" className="hover:text-foreground">
               Terms
             </Link>
@@ -58,13 +58,13 @@ export default function ImportsPage() {
       </header>
 
       <section className="border-b bg-[radial-gradient(circle_at_top_right,rgba(148,163,184,0.20),transparent_34rem)]">
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[1fr_360px] lg:items-end">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1fr_360px] lg:items-end">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Imports</p>
-            <h1 className="mt-8 max-w-4xl text-5xl font-black tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+            <h1 className="mt-8 max-w-4xl text-4xl font-black tracking-tight text-foreground sm:text-6xl lg:text-7xl">
               Accepted Schedule Files
             </h1>
-            <p className="mt-6 max-w-3xl text-xl leading-9 text-muted-foreground">
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-muted-foreground sm:text-xl sm:leading-9">
               SchedAI accepts simple schedule tables from text-based PDFs, CSV files, and Excel workbooks. Use the template if you want a clean file shape to fill in manually.
             </p>
             <Button asChild className="mt-10">
@@ -83,7 +83,7 @@ export default function ImportsPage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[320px_1fr]">
+      <section className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[320px_1fr]">
         <aside className="lg:sticky lg:top-8 lg:h-fit">
           <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Download</p>
           <div className="mt-4 grid gap-3">

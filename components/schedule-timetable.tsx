@@ -41,11 +41,12 @@ export const ScheduleTimetable = forwardRef<HTMLDivElement, ScheduleTimetablePro
   const end = Math.min(22 * 60, Math.ceil(Math.max(...meetings.map(({ meeting }) => meeting.end)) / 30) * 30);
   const timeRows = Array.from({ length: (end - start) / 30 + 1 }, (_, index) => start + index * 30);
   const totalMinutes = end - start;
-  const gridTemplateColumns = `88px repeat(${visibleDays.length}, minmax(140px, 1fr))`;
+  const gridTemplateColumns = `72px repeat(${visibleDays.length}, minmax(120px, 1fr))`;
+  const minWidth = Math.max(520, 72 + visibleDays.length * 120);
 
   return (
     <div className="overflow-x-auto rounded-2xl border bg-white dark:border-white/10 dark:bg-black">
-      <div ref={ref} className="min-w-[720px] bg-white dark:bg-black">
+      <div ref={ref} className="bg-white dark:bg-black" style={{ minWidth }}>
         <div className="grid border-b bg-secondary/70 dark:border-white/10 dark:bg-[#050505]" style={{ gridTemplateColumns }}>
           <div className="p-3 text-xs font-medium text-muted-foreground">Time</div>
           {visibleDays.map((day) => (

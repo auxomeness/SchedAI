@@ -1,7 +1,7 @@
 # SchedAI
 
 **Author:** Karl Austin B. Pavia  
-**Version:** 0.0.1
+**Version:** 0.2.0
 
 SchedAI is a personal schedule generator for university students.
 
@@ -19,6 +19,8 @@ The goal is to help students plan smarter before finalizing their enrollment.
 
 - Upload university schedule files
 - Supports text-based PDF, CSV, and Excel files
+- Supports Google Sheets and Google Docs links shared as view-only
+- Provides a Google Sheets template users can copy and fill out
 - Parses available subjects and class sections
 - Lets students choose subjects
 - Lets students choose exact sections, professors, rooms, and time slots
@@ -53,7 +55,11 @@ Always verify the final schedule with the official university enrollment system.
 
 SchedAI can be run locally during development.
 
-It is also planned to be deployed as a website, so students can access it online without setting up the project locally.
+It is also deployed as a website, so students can access it online without setting up the project locally:
+
+```txt
+https://schedai.vercel.app
+```
 
 ## Tech Stack
 
@@ -63,6 +69,7 @@ It is also planned to be deployed as a website, so students can access it online
 - shadcn-style UI components
 - Client-side file parsing
 - Client-side schedule generation
+- Server-assisted Google file import for shared Google links
 - Browser local storage
 
 ## Privacy
@@ -78,8 +85,30 @@ Supported formats:
 - PDF, text-based only
 - CSV
 - XLSX / Excel
+- Google Sheets links shared as "Anyone with the link can view"
+- Google Docs links shared as "Anyone with the link can view"
+
+Google Sheets is recommended for link imports because it exports clean CSV data. Google Docs support is beta and works best with simple text tables.
 
 Scanned image PDFs are not supported.
+
+## Import Format
+
+Use one row per class section. The safest headers are:
+
+```txt
+Subject Code | Subject Name | Section | Days | Start Time | End Time | Professor | Room
+```
+
+Minimum required fields are subject code, subject name, days, start time, and end time.
+
+Example:
+
+```txt
+COURSE101 | Sample Course Title | SEC-A | MW | 9:00 AM | 10:30 AM | Professor Name | Room / Online
+```
+
+For noon, use `12:00 PM` or `12:00 NN`, not `12:00 AM`.
 
 ## Development
 

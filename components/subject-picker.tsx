@@ -263,8 +263,8 @@ export function SubjectPicker({
       </Card>
 
       {isExpandedViewOpen ? (
-        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/70 p-12 backdrop-blur-xl">
-          <div className="flex max-h-[88vh] w-full max-w-6xl flex-col rounded-2xl border bg-card text-card-foreground shadow-2xl">
+        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/70 p-10 backdrop-blur-xl sm:p-12">
+          <div className="flex max-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col rounded-2xl border bg-card text-card-foreground shadow-2xl sm:max-h-[88vh]">
             <div className="flex items-start justify-between gap-4 border-b p-5">
               <div>
                 <h2 className="text-lg font-semibold">Choose exact sections</h2>
@@ -276,7 +276,7 @@ export function SubjectPicker({
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <div className="space-y-4 overflow-hidden p-5">
+            <div className="space-y-4 overflow-hidden p-4 sm:p-5">
               {renderSearch()}
               {renderActions({ showExpand: false })}
               {renderSubjectList("max-h-[60vh]")}

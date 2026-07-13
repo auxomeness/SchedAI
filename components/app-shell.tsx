@@ -25,6 +25,7 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   breaks: [],
   preferCompact: true
 };
+const APP_VERSION = "0.2.0";
 
 export function AppShell() {
   const timetableRef = useRef<HTMLDivElement>(null);
@@ -233,7 +234,7 @@ export function AppShell() {
   }
 
   return (
-    <main className="flex min-h-screen w-full max-w-none flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="flex min-h-screen w-full max-w-none flex-col gap-8 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8">
       <header className="sticky top-4 z-20 mx-auto flex h-auto w-full max-w-7xl flex-col gap-3 rounded-[24px] border border-white/50 bg-white/30 px-5 py-3 shadow-[inset_0_1px_rgba(255,255,255,0.65),0_18px_52px_rgba(31,38,46,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-black/50 sm:h-[62px] sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:py-2">
         <a href="#" className="inline-flex items-baseline gap-1 text-xl font-extrabold tracking-tight">
           <span>SchedAI</span>
@@ -365,8 +366,8 @@ export function AppShell() {
         </div>
       ) : null}
       {isPreviewOpen && displaySchedule ? (
-        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/75 p-12 backdrop-blur-xl">
-          <div className="flex max-h-[88vh] w-full max-w-7xl flex-col rounded-2xl border bg-card text-card-foreground shadow-2xl">
+        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/75 p-10 backdrop-blur-xl sm:p-12">
+          <div className="flex max-h-[calc(100vh-4rem)] w-full max-w-7xl flex-col rounded-2xl border bg-card text-card-foreground shadow-2xl sm:max-h-[88vh]">
             <div className="flex items-center justify-between gap-4 border-b p-5">
               <div className="flex min-w-0 items-center gap-3">
                 <img src="/arxeni.png" alt="Arxeni" className="hidden h-8 w-auto object-contain dark:invert sm:block" />
@@ -379,22 +380,23 @@ export function AppShell() {
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <div className="overflow-auto p-5">
+            <div className="overflow-auto p-3 sm:p-5">
               <ScheduleTimetable schedule={displaySchedule} frozenSchedules={frozenSchedules} />
             </div>
           </div>
         </div>
       ) : null}
       <footer className="-mx-4 -mb-6 mt-12 bg-[#050607] px-4 py-14 text-slate-400 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(220px,0.76fr)_minmax(520px,1.6fr)]">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,0.76fr)_minmax(0,1.6fr)]">
           <div className="grid content-start gap-5">
-            <img src="/arxeni.png" alt="Arxeni" className="w-48 object-contain" />
+            <img src="/arxeni.png" alt="Arxeni" className="w-40 max-w-full object-contain sm:w-48" />
             <p className="max-w-72 text-sm leading-7">
               Personal schedule generation for clean weekly class plans. No enrollment actions, no server storage.
             </p>
             <a className="w-fit text-sm font-semibold text-slate-200 hover:underline" href="mailto:arxeni.dev@gmail.com">
               arxeni.dev@gmail.com
             </a>
+            <p className="text-xs font-semibold text-slate-600">Version {APP_VERSION}</p>
             <small className="mt-8 text-xs text-slate-600">© 2026 SchedAI by Arxeni. All rights reserved.</small>
           </div>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">

@@ -205,7 +205,7 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
       </Card>
 
       {isPageDragging ? (
-        <div className="pointer-events-none fixed -inset-8 z-[9998] grid place-items-center bg-black/50 p-12 backdrop-blur-lg">
+        <div className="pointer-events-none fixed -inset-8 z-[9998] grid place-items-center bg-black/50 p-10 backdrop-blur-lg sm:p-12">
           <div className="rounded-2xl border bg-card px-6 py-5 text-center text-card-foreground shadow-2xl">
             <FileUp className="mx-auto h-7 w-7" />
             <p className="mt-3 text-sm font-extrabold">Drop schedule file to upload</p>
@@ -215,8 +215,8 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
       ) : null}
 
       {isHelpOpen ? (
-        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/70 p-12 backdrop-blur-xl" role="dialog" aria-modal="true" aria-labelledby="import-help-title">
-          <div className="w-full max-w-2xl rounded-2xl border bg-card text-card-foreground shadow-2xl">
+        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/70 p-10 backdrop-blur-xl sm:p-12" role="dialog" aria-modal="true" aria-labelledby="import-help-title">
+          <div className="flex max-h-[calc(100vh-4rem)] w-full max-w-2xl flex-col rounded-2xl border bg-card text-card-foreground shadow-2xl sm:max-h-[88vh]">
             <div className="flex items-start justify-between gap-4 border-b p-5">
               <div>
                 <h2 id="import-help-title" className="text-lg font-extrabold">
@@ -230,7 +230,7 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <div className="space-y-5 p-5">
+            <div className="space-y-5 overflow-auto p-4 sm:p-5">
               <div>
                 <p className="text-sm font-semibold">Recommended columns</p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -287,8 +287,8 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
       ) : null}
 
       {isGoogleImportOpen ? (
-        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/70 p-12 backdrop-blur-xl" role="dialog" aria-modal="true" aria-labelledby="google-import-title">
-          <div className="w-full max-w-xl rounded-2xl border bg-card text-card-foreground shadow-2xl">
+        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/70 p-10 backdrop-blur-xl sm:p-12" role="dialog" aria-modal="true" aria-labelledby="google-import-title">
+          <div className="flex max-h-[calc(100vh-4rem)] w-full max-w-xl flex-col rounded-2xl border bg-card text-card-foreground shadow-2xl sm:max-h-[88vh]">
             <div className="flex items-start justify-between gap-4 border-b p-5">
               <div>
                 <h2 id="google-import-title" className="text-lg font-extrabold">
@@ -302,7 +302,7 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <div className="space-y-4 p-5">
+            <div className="space-y-4 overflow-auto p-4 sm:p-5">
               <div className="space-y-2">
                 <label htmlFor="google-import-url" className="text-sm font-semibold">
                   Google link

@@ -19,12 +19,12 @@ export function LegalPage({ eyebrow, title, intro, documentTitle, documentSummar
   return (
     <main className="min-h-screen bg-background text-foreground">
       <header className="border-b bg-white/80 backdrop-blur-xl dark:bg-black/80">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
+        <div className="mx-auto flex min-h-20 max-w-7xl flex-col items-start justify-center gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-0">
           <Link href="/" className="inline-flex items-baseline gap-1 text-2xl font-extrabold tracking-tight">
             <span>SchedAI</span>
             <span className="font-normal text-muted-foreground">by Arxeni</span>
           </Link>
-          <nav className="flex items-center gap-6 text-sm font-semibold text-muted-foreground">
+          <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-muted-foreground sm:gap-6">
             <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
             <Link href="/terms" className="hover:text-foreground">Terms</Link>
             <Link href="/" className="hover:text-foreground">Workspace</Link>
@@ -33,13 +33,13 @@ export function LegalPage({ eyebrow, title, intro, documentTitle, documentSummar
       </header>
 
       <section className="border-b bg-[radial-gradient(circle_at_top_right,rgba(148,163,184,0.20),transparent_34rem)]">
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-24 lg:grid-cols-[1fr_360px] lg:items-end">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1fr_360px] lg:items-end">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">{eyebrow}</p>
-            <h1 className="mt-8 max-w-4xl text-6xl font-black tracking-tight text-foreground sm:text-7xl lg:text-8xl">
+            <h1 className="mt-8 max-w-4xl text-4xl font-black tracking-tight text-foreground sm:text-7xl lg:text-8xl">
               {title}
             </h1>
-            <p className="mt-6 max-w-3xl text-xl leading-9 text-muted-foreground">{intro}</p>
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-muted-foreground sm:text-xl sm:leading-9">{intro}</p>
             <Link
               href="/"
               className="mt-10 inline-flex h-12 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
@@ -55,7 +55,7 @@ export function LegalPage({ eyebrow, title, intro, documentTitle, documentSummar
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[240px_1fr]">
+      <section className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[240px_1fr]">
         <aside className="lg:sticky lg:top-8 lg:h-fit">
           <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Sections</p>
           <nav className="mt-4 grid gap-3 text-sm font-semibold text-muted-foreground">
