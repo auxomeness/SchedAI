@@ -96,7 +96,7 @@ export function ManualSubjectForm({ onAdd }: ManualSubjectFormProps) {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="manual-course-code">Course code</Label>
-              <Input id="manual-course-code" value={courseCode} onChange={(event) => setCourseCode(event.target.value)} placeholder="ITMC313" />
+              <Input id="manual-course-code" value={courseCode} onChange={(event) => setCourseCode(event.target.value)} placeholder="COURSE101" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="manual-section">Section</Label>
@@ -106,7 +106,7 @@ export function ManualSubjectForm({ onAdd }: ManualSubjectFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="manual-course-name">Course name</Label>
-            <Input id="manual-course-name" value={courseName} onChange={(event) => setCourseName(event.target.value)} placeholder="Web Systems and Technologies" />
+            <Input id="manual-course-name" value={courseName} onChange={(event) => setCourseName(event.target.value)} placeholder="Sample Course Title" />
           </div>
 
           <div className="space-y-2">

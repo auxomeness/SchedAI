@@ -398,7 +398,16 @@ export function AppShell() {
             <small className="mt-8 text-xs text-slate-600">© 2026 SchedAI by Arxeni. All rights reserved.</small>
           </div>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
-            <FooterColumn title="Explore" links={["Workspace", "Upload", "Subjects", "Preferences"]} />
+            <FooterColumn
+              title="Explore"
+              links={[
+                { label: "Workspace", href: "/" },
+                { label: "Imports", href: "/imports" },
+                "Upload",
+                "Subjects",
+                "Preferences"
+              ]}
+            />
             <FooterColumn title="Product" links={["Schedule Generator", "PNG Export", "PDF Export", "Frozen Schedules"]} />
             <FooterColumn title="More from Arxeni" links={["Expy", "Lumen", "APOS Web", "APOS Mobile", "ProxiFix"]} />
             <FooterColumn

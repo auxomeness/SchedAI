@@ -1,7 +1,8 @@
 "use client";
 
-import type { ChangeEvent } from "react";
-import { FileCheck2, FileUp, Loader2, Paperclip, X } from "lucide-react";
+import type { ChangeEvent, DragEvent } from "react";
+import { useState } from "react";
+import { FileCheck2, FileSpreadsheet, FileText, FileUp, HelpCircle, Loader2, Paperclip, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,11 +18,19 @@ interface UploadPanelProps {
   fileName?: string;
 }
 
-export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onRemove, fileName }: UploadPanelProps) {
-  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+const templateDownloads = [
+  { label: "Excel template", href: "/templates/schedai-import-template.xlsx", icon: FileSpreadsheet },
+  { label: "PDF template", href: "/templates/schedai-import-template.pdf", icon: FileText },
+  { label: "CSV template", href: "/templates/schedai-import-template.csv", icon: FileText }
+];
 
+const acceptedColumns = ["Subject Code", "Subject Name", "Section", "Days", "Start Time", "End Time", "Professor", "Room"];
+
+export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onRemove, fileName }: UploadPanelProps) {
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  async function parseFile(file: File) {
     onParsingChange(true);
     onError("");
 
@@ -32,53 +41,147 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
       onError(error instanceof Error ? error.message : "We could not read this schedule file.");
     } finally {
       onParsingChange(false);
+    }
+  }
+
+  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await parseFile(file);
+    } finally {
       event.target.value = "";
     }
   }
 
+  function handleDragOver(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    if (!isParsing) setIsDragging(true);
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+  }
+
+  async function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+    const file = event.dataTransfer.files?.[0];
+    if (!file || isParsing) return;
+    await parseFile(file);
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <FileUp className="h-5 w-5 text-foreground" />
-          <div>
-            <CardTitle>Upload schedule file</CardTitle>
-            <CardDescription>PDF, CSV, or Excel. Text-based files work best.</CardDescription>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <FileUp className="h-5 w-5 shrink-0 text-foreground" />
+              <div>
+                <CardTitle>Upload schedule file</CardTitle>
+                <CardDescription>PDF, CSV, or Excel. Text-based files work best.</CardDescription>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-9 w-9 shrink-0 rounded-full p-0"
+              onClick={() => setIsHelpOpen(true)}
+              aria-label="Show accepted import format"
+            >
+              <HelpCircle className="h-5 w-5" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <label className="block" onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+            <span className="sr-only">Choose schedule file</span>
+            <Input className="hidden" accept=".pdf,.csv,.xlsx,.xls" disabled={isParsing} type="file" onChange={handleFileChange} />
+            <span className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-3 text-sm font-medium transition-colors dark:bg-[#050505]/90 ${isDragging ? "border-foreground bg-secondary" : "bg-white/70 hover:bg-secondary/70"}`}>
+              {fileName ? <Paperclip className="h-4 w-4" /> : <FileUp className="h-4 w-4" />}
+              {isDragging ? "Drop file to upload" : fileName ? "Replace attached file" : "Choose or drag schedule file"}
+            </span>
+          </label>
+          <div className="flex min-h-5 items-center gap-2 text-sm text-muted-foreground">
+            {isParsing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Reading file...
+              </>
+            ) : fileName ? (
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="inline-flex min-w-0 items-center gap-2 rounded-full border bg-card px-3 py-1 text-foreground">
+                  <FileCheck2 className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{fileName} attached</span>
+                </span>
+                {onRemove ? (
+                  <Button type="button" size="sm" variant="ghost" className="h-8 w-8 rounded-full p-0" onClick={onRemove} aria-label="Remove attached file">
+                    <X className="h-4 w-4" />
+                  </Button>
+                ) : null}
+              </div>
+            ) : (
+              <>No file loaded yet.</>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {isHelpOpen ? (
+        <div className="fixed -inset-8 z-[9999] grid place-items-center bg-black/70 p-12 backdrop-blur-xl" role="dialog" aria-modal="true" aria-labelledby="import-help-title">
+          <div className="w-full max-w-2xl rounded-2xl border bg-card text-card-foreground shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b p-5">
+              <div>
+                <h2 id="import-help-title" className="text-lg font-extrabold">
+                  Accepted import format
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  Upload a text-based PDF, CSV, XLSX, or XLS file with one row per class section.
+                </p>
+              </div>
+              <Button type="button" variant="ghost" size="sm" className="h-9 w-9 rounded-full p-0" onClick={() => setIsHelpOpen(false)} aria-label="Close import help">
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="space-y-5 p-5">
+              <div>
+                <p className="text-sm font-semibold">Recommended columns</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {acceptedColumns.map((column) => (
+                    <span key={column} className="rounded-full border bg-secondary px-3 py-1 text-xs font-semibold">
+                      {column}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-xl border bg-secondary/50 p-4 text-sm leading-7 text-muted-foreground">
+                <p>
+                  Example row: <span className="font-semibold text-foreground">COURSE101</span>, Sample Course Title, SEC-A, MW, 9:00 AM, 10:30 AM,
+                  Professor Name, Room / Online.
+                </p>
+                <p className="mt-2">PDF files must be text-based. Scanned image PDFs may not parse correctly.</p>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {templateDownloads.map(({ label, href, icon: Icon }) => (
+                  <Button key={href} asChild variant="outline" className="justify-center">
+                    <a href={href} download>
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </a>
+                  </Button>
+                ))}
+              </div>
+              <a href="/imports" className="inline-flex text-sm font-semibold text-foreground underline-offset-4 hover:underline">
+                View full import guide
+              </a>
+            </div>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <label className="block">
-          <span className="sr-only">Choose schedule file</span>
-          <Input className="hidden" accept=".pdf,.csv,.xlsx,.xls" disabled={isParsing} type="file" onChange={handleFileChange} />
-          <span className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed bg-white/70 px-4 py-3 text-sm font-medium transition-colors hover:bg-secondary/70 dark:bg-[#050505]/90">
-            {fileName ? <Paperclip className="h-4 w-4" /> : <FileUp className="h-4 w-4" />}
-            {fileName ? "Replace attached file" : "Choose schedule file"}
-          </span>
-        </label>
-        <div className="flex min-h-5 items-center gap-2 text-sm text-muted-foreground">
-          {isParsing ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Reading file...
-            </>
-          ) : fileName ? (
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="inline-flex min-w-0 items-center gap-2 rounded-full border bg-card px-3 py-1 text-foreground">
-                <FileCheck2 className="h-4 w-4 shrink-0" />
-                <span className="truncate">{fileName} attached</span>
-              </span>
-              {onRemove ? (
-                <Button type="button" size="sm" variant="ghost" className="h-8 w-8 rounded-full p-0" onClick={onRemove} aria-label="Remove attached file">
-                  <X className="h-4 w-4" />
-                </Button>
-              ) : null}
-            </div>
-          ) : (
-            <>No file loaded yet.</>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      ) : null}
+    </>
   );
 }
