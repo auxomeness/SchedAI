@@ -54,6 +54,19 @@ body {
   overflow-x: hidden;
 }
 
+.schedai-root {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.schedai-root * {
+  min-width: 0;
+}
+
+.schedai-root svg {
+  flex-shrink: 0;
+}
+
 body {
   background:
     radial-gradient(circle at top left, rgba(125, 211, 252, 0.2), transparent 34rem),

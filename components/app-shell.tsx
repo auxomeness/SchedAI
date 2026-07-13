@@ -25,7 +25,13 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   breaks: [],
   preferCompact: true
 };
-const APP_VERSION = "0.2.3";
+const APP_VERSION = "0.2.4";
+
+interface ExportResult {
+  format: "png" | "pdf";
+  fileName: string;
+  url: string;
+}
 
 export function AppShell() {
   const timetableRef = useRef<HTMLDivElement>(null);
@@ -46,6 +52,7 @@ export function AppShell() {
   const [isExporting, setIsExporting] = useState(false);
   const [isDownloadMenuOpen, setIsDownloadMenuOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [exportResult, setExportResult] = useState<ExportResult>();
   const [hasRestoredSession, setHasRestoredSession] = useState(false);
 
   useEffect(() => {
@@ -90,6 +97,12 @@ export function AppShell() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
   }, [isDarkMode]);
+
+  useEffect(() => {
+    return () => {
+      if (exportResult) URL.revokeObjectURL(exportResult.url);
+    };
+  }, [exportResult]);
 
   const currentSchedule = schedules[scheduleIndex];
   const frozenSections = useMemo(() => frozenSchedules.flatMap((schedule) => schedule.sections), [frozenSchedules]);
@@ -200,6 +213,7 @@ export function AppShell() {
     setIsDarkMode(false);
     setIsDownloadMenuOpen(false);
     setIsPreviewOpen(false);
+    setExportResult(undefined);
   }
 
   async function handleExport(format: "png" | "pdf") {
@@ -214,7 +228,12 @@ export function AppShell() {
       });
 
       if (format === "png") {
-        downloadDataUrl(dataUrl, "schedai-schedule.png");
+        const blob = dataUrlToBlob(dataUrl);
+        showExportResult({
+          format,
+          fileName: "schedai-schedule.png",
+          url: URL.createObjectURL(blob)
+        });
         return;
       }
 
@@ -225,7 +244,11 @@ export function AppShell() {
         format: [image.width, image.height]
       });
       pdf.addImage(dataUrl, "PNG", 0, 0, image.width, image.height);
-      pdf.save("schedai-schedule.pdf");
+      showExportResult({
+        format,
+        fileName: "schedai-schedule.pdf",
+        url: URL.createObjectURL(pdf.output("blob"))
+      });
     } catch (error) {
       setError(error instanceof Error ? `Export failed: ${error.message}` : "Export failed. Please try again.");
     } finally {
@@ -233,8 +256,22 @@ export function AppShell() {
     }
   }
 
+  function showExportResult(nextResult: ExportResult) {
+    setExportResult((existing) => {
+      if (existing) URL.revokeObjectURL(existing.url);
+      return nextResult;
+    });
+  }
+
+  function closeExportResult() {
+    setExportResult((existing) => {
+      if (existing) URL.revokeObjectURL(existing.url);
+      return undefined;
+    });
+  }
+
   return (
-    <main className="flex min-h-screen w-full max-w-none flex-col gap-8 overflow-x-hidden px-3 py-5 sm:px-6 lg:px-8">
+    <main className="schedai-root flex min-h-screen w-full max-w-none flex-col gap-8 overflow-x-hidden px-3 py-5 sm:px-6 lg:px-8">
       <header className="sticky top-4 z-20 mx-auto flex h-auto w-full max-w-7xl flex-col gap-3 rounded-[24px] border border-white/50 bg-white/30 px-4 py-4 shadow-[inset_0_1px_rgba(255,255,255,0.65),0_18px_52px_rgba(31,38,46,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-black/50 sm:h-[62px] sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:px-5 sm:py-2">
         <a href="#" className="inline-flex items-baseline gap-1 text-xl font-extrabold tracking-tight">
           <span>SchedAI</span>
@@ -253,8 +290,8 @@ export function AppShell() {
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[460px_minmax(0,1fr)]">
-        <section className="space-y-5">
+      <div className="grid w-full min-w-0 gap-6 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]">
+        <section className="min-w-0 space-y-5">
           <div className="space-y-3 rounded-2xl border bg-white/70 p-3 shadow-sm dark:bg-[#050505]/90">
             <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
               <div className="rounded-xl border bg-white/70 px-3 py-2 text-sm text-muted-foreground dark:bg-[#050505]/90">
@@ -320,7 +357,7 @@ export function AppShell() {
           </div>
         </section>
 
-        <section className="space-y-5">
+        <section className="min-w-0 space-y-5">
           {error ? <FeedbackCard title="File could not be read" items={[{ message: error, suggestion: "Try a text-based PDF, CSV, or Excel file with subject, day, and time columns." }]} /> : null}
           {reasons.length > 0 ? <FeedbackCard title="Unable to generate a schedule" items={reasons} /> : null}
           {displaySchedule ? (
@@ -359,6 +396,39 @@ export function AppShell() {
                 <Button variant="outline" disabled={isExporting} onClick={() => handleExport("pdf")}>
                   <FileDown className="h-4 w-4" />
                   PDF
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
+      {exportResult ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-lg">
+          <Card className="w-full max-w-sm shadow-2xl">
+            <CardContent className="space-y-4 p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <h2 className="text-base font-semibold">Export ready</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Open the file first on iPhone, then use Share or Save to Files if download does not start.
+                  </p>
+                </div>
+                <Button type="button" size="sm" variant="ghost" onClick={closeExportResult} aria-label="Close export options">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid gap-2">
+                <Button asChild>
+                  <a href={exportResult.url} target="_blank" rel="noreferrer">
+                    <Eye className="h-4 w-4" />
+                    View {exportResult.format.toUpperCase()}
+                  </a>
+                </Button>
+                <Button asChild variant="outline">
+                  <a href={exportResult.url} download={exportResult.fileName}>
+                    <Download className="h-4 w-4" />
+                    Download {exportResult.format.toUpperCase()}
+                  </a>
                 </Button>
               </div>
             </CardContent>
@@ -503,11 +573,15 @@ function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) 
   );
 }
 
-function downloadDataUrl(dataUrl: string, fileName: string) {
-  const link = document.createElement("a");
-  link.href = dataUrl;
-  link.download = fileName;
-  link.click();
+function dataUrlToBlob(dataUrl: string): Blob {
+  const [metadata, base64] = dataUrl.split(",");
+  const mime = metadata.match(/data:(.*?);/)?.[1] ?? "application/octet-stream";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return new Blob([bytes], { type: mime });
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
