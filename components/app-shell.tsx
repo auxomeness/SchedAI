@@ -29,7 +29,7 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   subjectTimePreferences: [],
   preferCompact: true
 };
-const APP_VERSION = "0.2.8";
+const APP_VERSION = "0.2.9";
 
 interface ExportResult {
   format: "png" | "pdf";
@@ -358,7 +358,7 @@ export function AppShell() {
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             {isDarkMode ? "Light" : "Dark"}
           </Button>
-          <Button className="min-w-0" disabled={!canGenerate} onClick={handleGenerate}>
+          <Button className="aura-button min-w-0" disabled={!canGenerate} onClick={handleGenerate}>
             <CalendarCheck2 className="h-4 w-4" />
             Generate
           </Button>
@@ -425,7 +425,7 @@ export function AppShell() {
             onChange={setPreferences}
           />
           <div className="grid gap-3">
-            <Button size="lg" disabled={!canGenerate} onClick={handleGenerate}>
+            <Button className="aura-button" size="lg" disabled={!canGenerate} onClick={handleGenerate}>
               <CalendarCheck2 className="h-4 w-4" />
               Generate Schedule
             </Button>

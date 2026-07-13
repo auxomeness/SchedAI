@@ -106,3 +106,68 @@ input,
 select {
   font: inherit;
 }
+
+@layer components {
+  .aura-hover {
+    position: relative;
+    transition:
+      border-color 180ms ease,
+      box-shadow 220ms ease,
+      filter 220ms ease,
+      transform 220ms ease,
+      background-color 180ms ease;
+  }
+
+  .aura-hover:hover,
+  .aura-hover:focus-within {
+    border-color: hsl(var(--border));
+    filter:
+      drop-shadow(-9px 0 9px rgba(255, 42, 31, 0.68))
+      drop-shadow(9px 0 9px rgba(255, 119, 0, 0.62))
+      drop-shadow(0 11px 9px rgba(7, 93, 255, 0.46));
+    transform: translateY(-1px);
+  }
+
+  .dark .aura-hover:hover,
+  .dark .aura-hover:focus-within {
+    border-color: hsl(var(--border));
+    filter:
+      drop-shadow(-9px 0 9px rgba(255, 42, 31, 0.72))
+      drop-shadow(9px 0 9px rgba(255, 119, 0, 0.66))
+      drop-shadow(0 11px 9px rgba(7, 93, 255, 0.56));
+  }
+
+  .aura-button {
+    isolation: isolate;
+    overflow: visible;
+    position: relative;
+    transition:
+      transform 220ms ease,
+      background-color 180ms ease;
+  }
+
+  .aura-button::before {
+    background:
+      linear-gradient(90deg, rgba(255, 42, 31, 0.74), rgba(255, 119, 0, 0.68)),
+      linear-gradient(180deg, transparent 34%, rgba(7, 93, 255, 0.5));
+    border-radius: inherit;
+    content: "";
+    inset: -7px;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: -1;
+    filter: blur(8px);
+    transition: opacity 220ms ease, filter 220ms ease;
+  }
+
+  .aura-button:hover:not(:disabled),
+  .aura-button:focus-visible:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .aura-button:hover:not(:disabled)::before,
+  .aura-button:focus-visible:not(:disabled)::before {
+    opacity: 1;
+  }
+}
