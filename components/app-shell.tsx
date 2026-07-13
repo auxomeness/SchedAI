@@ -408,7 +408,6 @@ export function AppShell() {
                 "Preferences"
               ]}
             />
-            <FooterColumn title="Product" links={["Schedule Generator", "PNG Export", "PDF Export", "Frozen Schedules"]} />
             <FooterColumn title="More from Arxeni" links={["Expy", "Lumen", "APOS Web", "APOS Mobile", "ProxiFix"]} />
             <FooterColumn
               title="Follow"
@@ -417,6 +416,14 @@ export function AppShell() {
                 { label: "LinkedIn", href: "https://www.linkedin.com/in/karlaustinpavia", icon: Linkedin },
                 { label: "Facebook", href: "https://www.facebook.com/karlaustin.pavia", icon: Facebook },
                 { label: "Instagram", href: "https://www.instagram.com/thatguyaustinn/", icon: Instagram }
+              ]}
+            />
+            <FooterColumn
+              title="Help"
+              links={[
+                { label: "Imports", href: "/imports#imports" },
+                { label: "Google Sheets", href: "/imports#google-sheets" },
+                { label: "Google Docs", href: "/imports#google-docs" }
               ]}
             />
             <FooterColumn

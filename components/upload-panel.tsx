@@ -25,6 +25,7 @@ const templateDownloads = [
 ];
 
 const acceptedColumns = ["Subject Code", "Subject Name", "Section", "Days", "Start Time", "End Time", "Professor", "Room"];
+const googleSheetsTemplateUrl = "https://docs.google.com/spreadsheets/d/1pojtsXh_zfO2HwHBQ09vZ3aORqIXRwWCFztP5HunI8Y/copy";
 
 export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onRemove, fileName }: UploadPanelProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -248,6 +249,25 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
                 <p className="mt-2">PDF files must be text-based. Scanned image PDFs may not parse correctly.</p>
                 <p className="mt-2">For Google links, share the file as "Anyone with the link can view" before importing.</p>
               </div>
+              <div className="rounded-xl border bg-card p-4 text-sm leading-7">
+                <p className="font-semibold">Google import guide</p>
+                <p className="mt-2 text-muted-foreground">Google Sheets is recommended. Make a copy of the template, fill one class section per row, share it as view-only, then paste the normal Sheet link into SchedAI.</p>
+                <p className="mt-2 text-muted-foreground">Google Docs is beta. Use a real 8-column text table, not a screenshot, and avoid merged cells or title rows above the headers.</p>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button asChild variant="outline" className="justify-center">
+                  <a href={googleSheetsTemplateUrl} target="_blank" rel="noreferrer">
+                    <FileSpreadsheet className="h-4 w-4" />
+                    Google Sheets template
+                  </a>
+                </Button>
+                <Button asChild variant="outline" className="justify-center">
+                  <a href="/imports#google-sheets">
+                    <Link2 className="h-4 w-4" />
+                    Google guide
+                  </a>
+                </Button>
+              </div>
               <div className="grid gap-2 sm:grid-cols-3">
                 {templateDownloads.map(({ label, href, icon: Icon }) => (
                   <Button key={href} asChild variant="outline" className="justify-center">
@@ -305,6 +325,12 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
                 <p>Google Sheets is recommended because it exports clean CSV data.</p>
                 <p className="mt-2">Google Docs support is beta and works best when the document contains a simple text table.</p>
               </div>
+              <Button asChild variant="outline" className="w-full">
+                <a href={googleSheetsTemplateUrl} target="_blank" rel="noreferrer">
+                  <FileSpreadsheet className="h-4 w-4" />
+                  Make a copy of the Google Sheets template
+                </a>
+              </Button>
               {googleError ? (
                 <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                   {googleError}

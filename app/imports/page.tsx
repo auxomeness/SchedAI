@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Download, FileSpreadsheet, FileText, Link2 } from "lucide-react";
+import { Download, FileSpreadsheet, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -32,6 +32,7 @@ const templateDownloads = [
 ];
 
 const exampleRow = ["COURSE101", "Sample Course Title", "SEC-A", "MW", "9:00 AM", "10:30 AM", "Professor Name", "Room / Online"];
+const googleSheetsTemplateUrl = "https://docs.google.com/spreadsheets/d/1pojtsXh_zfO2HwHBQ09vZ3aORqIXRwWCFztP5HunI8Y/copy";
 
 export default function ImportsPage() {
   return (
@@ -98,7 +99,7 @@ export default function ImportsPage() {
         </aside>
 
         <div className="space-y-10">
-          <section className="rounded-2xl border bg-card p-6 shadow-sm">
+          <section id="imports" className="rounded-2xl border bg-card p-6 shadow-sm">
             <h2 className="text-2xl font-black tracking-tight">Required table shape</h2>
             <p className="mt-3 text-base leading-8 text-muted-foreground">
               Keep one section per row. These column names are the safest format because they map directly to SchedAI's parser.
@@ -112,17 +113,48 @@ export default function ImportsPage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border bg-card p-6 shadow-sm">
+          <section id="google-sheets" className="rounded-2xl border bg-card p-6 shadow-sm">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
-              <Link2 className="h-5 w-5" />
+              <FileSpreadsheet className="h-5 w-5" />
             </div>
-            <h2 className="mt-5 text-2xl font-black tracking-tight">Google links</h2>
+            <h2 className="mt-5 text-2xl font-black tracking-tight">Google Sheets guide</h2>
             <p className="mt-3 text-base leading-8 text-muted-foreground">
-              You can paste a normal Google Sheets or Google Docs link in the workspace. Share the file as "Anyone with the link can view" before importing.
+              Google Sheets is the recommended Google import method because SchedAI can export the sheet as clean CSV data.
             </p>
+            <div className="mt-5 grid gap-3 text-sm leading-7 text-muted-foreground">
+              <p>1. Click the template button and choose Make a copy.</p>
+              <p>2. Keep the first row headers: Subject Code, Subject Name, Section, Days, Start Time, End Time, Professor, Room.</p>
+              <p>3. Fill one class section per row. Leave Section, Professor, or Room blank if unknown.</p>
+              <p>4. Use day values like MW, TTH, MON, TUE, WED, THU, FRI, or SAT.</p>
+              <p>5. Use clear times like 9:00 AM, 10:30 AM, 12:00 PM, 12:00 NN, or 1:30 PM. Use 12:00 PM or 12:00 NN for noon, not 12:00 AM.</p>
+              <p>6. Click Share, set access to Anyone with the link can view, then copy the normal Google Sheets URL.</p>
+              <p>7. In SchedAI, click Import from Google link and paste that normal URL.</p>
+            </div>
+            <Button asChild className="mt-6">
+              <a href={googleSheetsTemplateUrl} target="_blank" rel="noreferrer">
+                <FileSpreadsheet className="h-4 w-4" />
+                Make a copy of the Google Sheets template
+              </a>
+            </Button>
+          </section>
+
+          <section id="google-docs" className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+              <FileText className="h-5 w-5" />
+            </div>
+            <h2 className="mt-5 text-2xl font-black tracking-tight">Google Docs guide</h2>
             <p className="mt-3 text-base leading-8 text-muted-foreground">
-              Google Sheets is recommended because SchedAI can export it as CSV. Google Docs import is beta and works best with a simple text table.
+              Google Docs import is beta. Use it only when you need a document-style schedule. Google Sheets is still more reliable.
             </p>
+            <div className="mt-5 grid gap-3 text-sm leading-7 text-muted-foreground">
+              <p>1. Open Google Docs and insert a real table with 8 columns.</p>
+              <p>2. Put the same headers in the first table row: Subject Code, Subject Name, Section, Days, Start Time, End Time, Professor, Room.</p>
+              <p>3. Add one class section per row. Do not paste screenshots or images of a table.</p>
+              <p>4. Avoid merged cells, title rows above the header, extra notes inside the table, and wrapped multi-line values when possible.</p>
+              <p>5. Use readable day and time values, such as TTH and 11:00 AM to 12:00 PM.</p>
+              <p>6. Click Share, set access to Anyone with the link can view, then copy the normal Google Docs URL.</p>
+              <p>7. In SchedAI, click Import from Google link and paste that normal URL. If it fails, move the same data into Google Sheets.</p>
+            </div>
           </section>
 
           <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
