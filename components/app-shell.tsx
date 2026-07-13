@@ -5,6 +5,7 @@ import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
 import { AlertCircle, CalendarCheck2, Download, Eye, Facebook, FileDown, Github, Instagram, Linkedin, Lock, Moon, Plus, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BottomAurora } from "@/components/bottom-aurora";
 import { EmptyState } from "@/components/empty-state";
 import { ManualSubjectForm } from "@/components/manual-subject-form";
 import { PreferencesPanel } from "@/components/preferences-panel";
@@ -292,7 +293,7 @@ export function AppShell() {
         </div>
       </header>
 
-      <div className="grid w-full min-w-0 gap-6 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]">
+      <div className="relative z-10 grid w-full min-w-0 gap-6 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]">
         <section className="min-w-0 space-y-5">
           <div className="space-y-3 rounded-2xl border bg-white/70 p-3 shadow-sm dark:bg-[#050505]/90">
             <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
@@ -458,18 +459,19 @@ export function AppShell() {
           </div>
         </div>
       ) : null}
-      <footer className="-mx-3 -mb-5 mt-12 bg-[#050607] px-4 py-14 text-slate-400 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,0.76fr)_minmax(0,1.6fr)]">
+      <footer className="relative z-10 -mx-3 -mb-5 mt-12 min-h-[78vh] overflow-hidden border-t bg-white px-4 py-14 text-slate-600 dark:border-white/10 dark:bg-[#050607] dark:text-slate-400 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <BottomAurora />
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,0.76fr)_minmax(0,1.6fr)]">
           <div className="grid content-start gap-5">
-            <img src="/arxeni.png" alt="Arxeni" className="w-40 max-w-full object-contain sm:w-48" />
+            <img src="/arxeni.png" alt="Arxeni" className="w-40 max-w-full object-contain invert dark:invert-0 sm:w-48" />
             <p className="max-w-72 text-sm leading-7">
               Personal schedule generation for clean weekly class plans. No enrollment actions, no server storage.
             </p>
-            <a className="w-fit text-sm font-semibold text-slate-200 hover:underline" href="mailto:arxeni.dev@gmail.com">
+            <a className="w-fit text-sm font-semibold text-slate-900 hover:underline dark:text-slate-200" href="mailto:arxeni.dev@gmail.com">
               arxeni.dev@gmail.com
             </a>
-            <p className="text-xs font-semibold text-slate-600">Version {APP_VERSION}</p>
-            <small className="mt-8 text-xs text-slate-600">© 2026 SchedAI by Arxeni. All rights reserved.</small>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-600">Version {APP_VERSION}</p>
+            <small className="mt-8 text-xs text-slate-500 dark:text-slate-600">© 2026 SchedAI by Arxeni. All rights reserved.</small>
           </div>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
             <FooterColumn
@@ -556,7 +558,7 @@ type FooterLink = string | {
 function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) {
   return (
     <nav className="grid content-start gap-2">
-      <span className="mb-1 text-xs font-extrabold text-slate-200">{title}</span>
+      <span className="mb-1 text-xs font-extrabold text-slate-900 dark:text-slate-200">{title}</span>
       {links.map((link) => {
         const label = typeof link === "string" ? link : link.label;
         const href = typeof link === "string" ? "#" : link.href;
@@ -565,7 +567,7 @@ function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) 
         const isExternal = href.startsWith("http");
 
         return (
-          <a key={label} href={href} target={isExternal ? "_blank" : undefined} rel={isExternal ? "noreferrer" : undefined} className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-100 hover:underline">
+          <a key={label} href={href} target={isExternal ? "_blank" : undefined} rel={isExternal ? "noreferrer" : undefined} className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-950 hover:underline dark:hover:text-slate-100">
             {Icon ? <Icon className="h-4 w-4" /> : null}
             {label}
           </a>

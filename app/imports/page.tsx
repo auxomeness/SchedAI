@@ -37,8 +37,8 @@ const googleSheetsTemplateUrl = "https://docs.google.com/spreadsheets/d/1pojtsXh
 
 export default function ImportsPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b bg-white/80 backdrop-blur-xl dark:bg-black/80">
+    <main className="schedai-root min-h-screen bg-background text-foreground">
+      <header className="border-b bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex min-h-20 max-w-7xl flex-col items-start justify-center gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-0">
           <Link href="/" className="inline-flex items-baseline gap-1 text-2xl font-extrabold tracking-tight">
             <span>SchedAI</span>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 
 interface LegalSection {
   id: string;
@@ -18,8 +19,8 @@ interface LegalPageProps {
 
 export function LegalPage({ eyebrow, title, intro, documentTitle, documentSummary, sections }: LegalPageProps) {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b bg-white/80 backdrop-blur-xl dark:bg-black/80">
+    <main className="schedai-root min-h-screen bg-background text-foreground">
+      <header className="border-b bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex min-h-20 max-w-7xl flex-col items-start justify-center gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-0">
           <Link href="/" className="inline-flex items-baseline gap-1 text-2xl font-extrabold tracking-tight">
             <span>SchedAI</span>
@@ -44,12 +45,9 @@ export function LegalPage({ eyebrow, title, intro, documentTitle, documentSummar
               {title}
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-muted-foreground sm:text-xl sm:leading-9">{intro}</p>
-            <Link
-              href="/"
-              className="mt-10 inline-flex h-12 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-            >
-              Back to workspace
-            </Link>
+            <Button asChild size="lg" className="mt-10">
+              <Link href="/">Back to workspace</Link>
+            </Button>
           </div>
           <aside className="border-l-4 border-foreground/80 px-6 py-5">
             <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">Document</p>
@@ -71,7 +69,7 @@ export function LegalPage({ eyebrow, title, intro, documentTitle, documentSummar
           </nav>
         </aside>
 
-        <div className="divide-y">
+        <div className="divide-y divide-border">
           {sections.map((section) => (
             <section key={section.id} id={section.id} className="grid gap-8 py-10 first:pt-0 lg:grid-cols-[300px_1fr]">
               <h2 className="text-3xl font-black tracking-tight">{section.title}</h2>
