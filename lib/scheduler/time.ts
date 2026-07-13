@@ -103,32 +103,39 @@ export function parseDays(value: string): Weekday[] {
 
   const days: Weekday[] = [];
   let cursor = normalized;
-  const patterns: Array<[RegExp, Weekday]> = [
-    [/^MON(DAY)?/, "MON"],
-    [/^TUE(S|SDAY)?/, "TUE"],
-    [/^WED(NESDAY)?/, "WED"],
-    [/^THU(R|RS|RSDAY)?/, "THU"],
-    [/^FRI(DAY)?/, "FRI"],
-    [/^SAT(URDAY)?/, "SAT"],
-    [/^SUN(DAY)?/, "SUN"]
+  const patterns: Array<[string, Weekday]> = [
+    ["MONDAY", "MON"],
+    ["MON", "MON"],
+    ["TUESDAY", "TUE"],
+    ["TUES", "TUE"],
+    ["TUE", "TUE"],
+    ["WEDNESDAY", "WED"],
+    ["WED", "WED"],
+    ["THURSDAY", "THU"],
+    ["THURS", "THU"],
+    ["THUR", "THU"],
+    ["THU", "THU"],
+    ["TH", "THU"],
+    ["FRIDAY", "FRI"],
+    ["FRI", "FRI"],
+    ["SATURDAY", "SAT"],
+    ["SAT", "SAT"],
+    ["SUNDAY", "SUN"],
+    ["SUN", "SUN"],
+    ["M", "MON"],
+    ["T", "TUE"],
+    ["W", "WED"],
+    ["F", "FRI"],
+    ["S", "SAT"]
   ];
 
   while (cursor.length > 0) {
-    let matched = false;
-    for (const [pattern, day] of patterns) {
-      const match = cursor.match(pattern);
-      if (match) {
-        days.push(day);
-        cursor = cursor.slice(match[0].length);
-        matched = true;
-        break;
-      }
-    }
-    if (!matched) {
-      const charDay = DAY_ALIASES[cursor[0]];
-      if (charDay) days.push(charDay);
-      cursor = cursor.slice(1);
-    }
+    const match = patterns.find(([token]) => cursor.startsWith(token));
+    if (!match) return [];
+
+    const [token, day] = match;
+    days.push(day);
+    cursor = cursor.slice(token.length);
   }
 
   return Array.from(new Set(days));

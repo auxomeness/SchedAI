@@ -165,7 +165,11 @@ function normalizeDayCandidate(value: string): string {
 }
 
 function isDayCandidate(value: string): boolean {
-  return parseDays(normalizeDayCandidate(value)).length > 0;
+  const candidate = normalizeDayCandidate(value);
+  if (!candidate || /\d/.test(candidate)) return false;
+
+  return /^(?:M|T|W|TH|F|S|SA|SU|MON|TUE|TUES|WED|THU|THUR|THURS|FRI|SAT|SUN|MW|TTH|FSA|M-[A-Z]+|T-[A-Z]+|W-[A-Z]+|TH-[A-Z]+|F-[A-Z]+|S-[A-Z]+|SA-[A-Z]+|SU-[A-Z]+)$/i.test(candidate)
+    && parseDays(candidate).length > 0;
 }
 
 function extractPdfTail(tailText: string): { days: string; room: string; professor: string } {
@@ -194,14 +198,22 @@ function extractPdfTail(tailText: string): { days: string; room: string; profess
 
   const days = normalizeDayCandidate(tokens.slice(dayIndex, dayIndex + dayLength).join(""));
   const afterDays = tokens.slice(dayIndex + dayLength);
-  const room = afterDays.find((token) => !/^\d+(?:\.\d+)?$/.test(token)) ?? "";
-  const roomIndex = room ? afterDays.indexOf(room) : -1;
-  const afterRoom = roomIndex >= 0 ? afterDays.slice(roomIndex + 1) : afterDays;
+  const roomIndex = afterDays.findIndex((token) => !/^\d+(?:\.\d+)?$/.test(token));
+  const roomParts =
+    roomIndex >= 0
+      ? [
+          afterDays[roomIndex],
+          ...(afterDays[roomIndex + 1] && /^[A-Z]$/i.test(afterDays[roomIndex]) && /\d/.test(afterDays[roomIndex + 1])
+            ? [afterDays[roomIndex + 1]]
+            : [])
+        ]
+      : [];
+  const afterRoom = roomIndex >= 0 ? afterDays.slice(roomIndex + roomParts.length) : afterDays;
   const professorParts = afterRoom.filter((token) => !/^\d+(?:\.\d+)?$/.test(token));
 
   return {
     days,
-    room,
+    room: roomParts.join(" "),
     professor: professorParts.join(" ")
   };
 }

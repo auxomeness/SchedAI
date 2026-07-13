@@ -27,7 +27,7 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   subjectTimePreferences: [],
   preferCompact: true
 };
-const APP_VERSION = "0.2.6";
+const APP_VERSION = "0.2.7";
 
 interface ExportResult {
   format: "png" | "pdf";
