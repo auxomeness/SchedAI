@@ -170,7 +170,7 @@ export function UploadPanel({ isParsing, onParsingChange, onParsed, onError, onR
           <label className="block">
             <span className="sr-only">Choose schedule file</span>
             <Input className="hidden" accept=".pdf,.csv,.xlsx,.xls" disabled={isParsing} type="file" onChange={handleFileChange} />
-            <span className={`flex min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-3 text-sm font-medium transition-colors dark:bg-[#050505]/90 ${isPageDragging ? "border-foreground bg-secondary" : "bg-white/70 hover:bg-secondary/70"}`}>
+            <span className={`flex min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-3 text-sm font-medium transition-colors dark:bg-[#151820]/90 ${isPageDragging ? "border-foreground bg-secondary" : "bg-white/70 hover:bg-secondary/70"}`}>
               {fileName ? <Paperclip className="h-4 w-4" /> : <FileUp className="h-4 w-4" />}
               <span className="truncate">{isPageDragging ? "Drop file anywhere to upload" : fileName ? "Replace attached file" : "Choose or drag schedule file"}</span>
             </span>

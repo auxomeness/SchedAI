@@ -114,7 +114,7 @@ export function ManualSubjectForm({ onAdd }: ManualSubjectFormProps) {
             <Input id="manual-professor" value={professor} onChange={(event) => setProfessor(event.target.value)} placeholder="Optional" />
           </div>
 
-          <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#050505]/90">
+          <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#151820]/90">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div className="text-sm font-medium">Date and time</div>
               <Button type="button" size="sm" variant="outline" onClick={addMeeting}>
@@ -125,7 +125,7 @@ export function ManualSubjectForm({ onAdd }: ManualSubjectFormProps) {
 
             <div className="space-y-3">
               {meetings.map((meeting, index) => (
-                <div key={meeting.id} className="grid gap-2 rounded-xl border bg-white p-2 dark:bg-[#050505] sm:grid-cols-[1fr_1fr_1fr_auto]">
+                <div key={meeting.id} className="grid gap-2 rounded-xl border bg-white p-2 dark:bg-[#171b24] sm:grid-cols-[1fr_1fr_1fr_auto]">
                   <Select value={meeting.day} onValueChange={(value) => updateMeeting(meeting.id, { day: value as Weekday })}>
                     <SelectTrigger aria-label={`Meeting ${index + 1} day`}>
                       <SelectValue />

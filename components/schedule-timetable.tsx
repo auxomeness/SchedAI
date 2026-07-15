@@ -1,17 +1,17 @@
-import { forwardRef } from "react";
+import { forwardRef, type CSSProperties } from "react";
 import type { ClassSection, GeneratedSchedule, Meeting } from "@/types/schedule";
 import { DAYS, formatMinutes } from "@/lib/scheduler/time";
 import { ScheduleCard } from "@/components/schedule-card";
 import { cn } from "@/lib/utils";
 
 const COLORS = [
-  "bg-sky-100 text-sky-950 border-sky-200",
-  "bg-emerald-100 text-emerald-950 border-emerald-200",
-  "bg-amber-100 text-amber-950 border-amber-200",
-  "bg-rose-100 text-rose-950 border-rose-200",
-  "bg-indigo-100 text-indigo-950 border-indigo-200",
-  "bg-teal-100 text-teal-950 border-teal-200",
-  "bg-stone-100 text-stone-950 border-stone-200"
+  "#dbeafe",
+  "#d1fae5",
+  "#fef3c7",
+  "#ffe4e6",
+  "#e0e7ff",
+  "#ccfbf1",
+  "#f5f5f4"
 ];
 
 interface ScheduleTimetableProps {
@@ -46,9 +46,9 @@ export const ScheduleTimetable = forwardRef<HTMLDivElement, ScheduleTimetablePro
   const minWidth = Math.max(520, 72 + visibleDays.length * 120);
 
   return (
-    <div className="overflow-x-auto rounded-2xl border bg-white dark:border-white/10 dark:bg-black">
-      <div ref={ref} className="bg-white dark:bg-black" style={{ minWidth }}>
-        <div className="grid border-b bg-secondary/70 dark:border-white/10 dark:bg-[#050505]" style={{ gridTemplateColumns }}>
+    <div className="overflow-x-auto rounded-2xl border bg-white dark:border-white/10 dark:bg-[#111318]">
+      <div ref={ref} className="bg-white dark:bg-[#111318]" style={{ minWidth }}>
+        <div className="grid border-b bg-secondary/70 dark:border-white/10 dark:bg-[#161a22]" style={{ gridTemplateColumns }}>
           <div className="p-3 text-xs font-medium text-muted-foreground">Time</div>
           {visibleDays.map((day) => (
             <div key={day} className="border-l p-3 text-center text-xs font-semibold">
@@ -57,7 +57,7 @@ export const ScheduleTimetable = forwardRef<HTMLDivElement, ScheduleTimetablePro
           ))}
         </div>
         <div className="relative grid" style={{ gridTemplateColumns, height: Math.max(560, (totalMinutes / 60) * 84) }}>
-          <div className="relative border-r bg-secondary/30 dark:border-white/10 dark:bg-[#050505]/80">
+          <div className="relative border-r bg-secondary/30 dark:border-white/10 dark:bg-[#161a22]/80">
             {timeRows.map((time) => (
               <div
                 key={time}
@@ -79,10 +79,13 @@ export const ScheduleTimetable = forwardRef<HTMLDivElement, ScheduleTimetablePro
               ))}
               {meetings
                 .filter(({ meeting }) => meeting.day === day)
-                .map(({ section, meeting, frozen }, index) => (
+                .map(({ section, meeting, frozen }, index) => {
+                  const paletteColor = COLORS[schedule.sections.findIndex((item) => item.id === section.id) % COLORS.length];
+                  const blockColor = frozen ? "#f1f5f9" : normalizeHexColor(section.color) ?? paletteColor;
+                  return (
                   <ClassBlock
                     key={`${section.id}-${meeting.day}-${meeting.start}-${meeting.end}`}
-                    color={frozen ? "bg-slate-100 text-slate-700 border-slate-300 dark:bg-[#111111] dark:text-white/85 dark:border-white/15" : COLORS[schedule.sections.findIndex((item) => item.id === section.id) % COLORS.length]}
+                    colorStyle={buildBlockStyle(blockColor, frozen)}
                     meeting={meeting}
                     min={start}
                     total={totalMinutes}
@@ -91,7 +94,8 @@ export const ScheduleTimetable = forwardRef<HTMLDivElement, ScheduleTimetablePro
                     offset={index}
                     onEdit={onEditSection}
                   />
-                ))}
+                  );
+                })}
             </div>
           ))}
         </div>
@@ -105,7 +109,7 @@ function ClassBlock({
   meeting,
   min,
   total,
-  color,
+  colorStyle,
   frozen,
   onEdit
 }: {
@@ -113,7 +117,7 @@ function ClassBlock({
   meeting: Meeting;
   min: number;
   total: number;
-  color: string;
+  colorStyle: CSSProperties;
   frozen: boolean;
   offset: number;
   onEdit?: (section: ClassSection, frozen: boolean) => void;
@@ -127,9 +131,9 @@ function ClassBlock({
       className={cn(
         "absolute left-2 right-2 overflow-hidden rounded-xl border p-2 text-left shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         onEdit ? "cursor-pointer hover:brightness-[0.98]" : "cursor-default",
-        color
+        frozen && "dark:border-white/15"
       )}
-      style={{ top: `calc(${top}% + 4px)`, height: `calc(${height}% - 8px)` }}
+      style={{ top: `calc(${top}% + 4px)`, height: `calc(${height}% - 8px)`, ...colorStyle }}
       onClick={() => onEdit?.(section, frozen)}
       aria-label={`Edit ${section.subjectCode} details`}
     >
@@ -137,4 +141,34 @@ function ClassBlock({
       <ScheduleCard section={section} />
     </button>
   );
+}
+
+function normalizeHexColor(value?: string) {
+  return value && /^#[0-9a-f]{6}$/i.test(value) ? value : undefined;
+}
+
+function buildBlockStyle(backgroundColor: string, frozen: boolean): CSSProperties {
+  const textColor = readableTextColor(backgroundColor);
+  return {
+    backgroundColor: frozen ? "hsl(var(--secondary))" : backgroundColor,
+    borderColor: frozen ? "hsl(var(--border))" : mixWithBlack(backgroundColor, 0.08),
+    color: frozen ? "hsl(var(--secondary-foreground))" : textColor
+  };
+}
+
+function readableTextColor(hex: string) {
+  const normalized = normalizeHexColor(hex) ?? "#dbeafe";
+  const red = Number.parseInt(normalized.slice(1, 3), 16);
+  const green = Number.parseInt(normalized.slice(3, 5), 16);
+  const blue = Number.parseInt(normalized.slice(5, 7), 16);
+  const brightness = (red * 299 + green * 587 + blue * 114) / 1000;
+  return brightness > 146 ? "#0f172a" : "#f8fafc";
+}
+
+function mixWithBlack(hex: string, amount: number) {
+  const normalized = normalizeHexColor(hex) ?? "#dbeafe";
+  const channels = [normalized.slice(1, 3), normalized.slice(3, 5), normalized.slice(5, 7)].map((part) =>
+    Math.max(0, Math.round(Number.parseInt(part, 16) * (1 - amount)))
+  );
+  return `#${channels.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
 }

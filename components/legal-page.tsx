@@ -28,6 +28,7 @@ export function LegalPage({ eyebrow, title, intro, documentTitle, documentSummar
           </Link>
           <div className="flex flex-wrap items-center gap-3 sm:gap-5">
             <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-muted-foreground sm:gap-6">
+              <Link href="/about" className="hover:text-foreground">Developer</Link>
               <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
               <Link href="/terms" className="hover:text-foreground">Terms</Link>
               <Link href="/" className="hover:text-foreground">Workspace</Link>

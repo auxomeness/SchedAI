@@ -24,23 +24,23 @@
 }
 
 .dark {
-  --background: 0 0% 0%;
-  --foreground: 210 40% 96%;
-  --card: 0 0% 3.5%;
-  --card-foreground: 210 40% 96%;
-  --primary: 210 40% 96%;
-  --primary-foreground: 0 0% 0%;
-  --secondary: 0 0% 10%;
-  --secondary-foreground: 210 40% 96%;
-  --muted: 0 0% 10%;
-  --muted-foreground: 0 0% 62%;
-  --accent: 0 0% 12%;
-  --accent-foreground: 0 0% 96%;
+  --background: 224 17% 8%;
+  --foreground: 220 18% 93%;
+  --card: 224 15% 11%;
+  --card-foreground: 220 18% 93%;
+  --primary: 220 18% 92%;
+  --primary-foreground: 224 17% 8%;
+  --secondary: 224 12% 16%;
+  --secondary-foreground: 220 16% 90%;
+  --muted: 224 12% 17%;
+  --muted-foreground: 220 10% 68%;
+  --accent: 224 12% 18%;
+  --accent-foreground: 220 18% 94%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 210 40% 98%;
-  --border: 0 0% 16%;
-  --input: 0 0% 16%;
-  --ring: 0 0% 90%;
+  --border: 224 12% 25%;
+  --input: 224 12% 25%;
+  --ring: 215 88% 67%;
 }
 
 * {
@@ -76,16 +76,16 @@ body {
 
 .dark body {
   background:
-    radial-gradient(circle at 78% 4%, rgba(148, 163, 184, 0.12), transparent 24rem),
-    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.055), transparent 22rem),
-    linear-gradient(180deg, #050505 0%, #000 38%, #000 100%);
+    radial-gradient(circle at 78% 4%, rgba(148, 163, 184, 0.14), transparent 24rem),
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.07), transparent 22rem),
+    linear-gradient(180deg, #151820 0%, #10131a 42%, #0f1117 100%);
 }
 
 .dark .schedai-root {
   background:
-    radial-gradient(circle at 72% 8%, rgba(148, 163, 184, 0.09), transparent 28rem),
-    radial-gradient(circle at 8% 3%, rgba(255, 255, 255, 0.05), transparent 20rem),
-    #000;
+    radial-gradient(circle at 72% 8%, rgba(148, 163, 184, 0.11), transparent 28rem),
+    radial-gradient(circle at 8% 3%, rgba(255, 255, 255, 0.06), transparent 20rem),
+    #10131a;
 }
 
 .dark .schedai-root .shadow-soft,
@@ -109,65 +109,115 @@ select {
 
 @layer components {
   .aura-hover {
+    isolation: isolate;
+    overflow: visible !important;
     position: relative;
+    filter:
+      drop-shadow(-10px 0 10px rgba(255, 42, 31, 0))
+      drop-shadow(10px 0 10px rgba(255, 119, 0, 0))
+      drop-shadow(0 12px 10px rgba(7, 93, 255, 0));
+    box-shadow:
+      0 -13px 24px rgba(255, 42, 31, 0),
+      -13px 2px 18px rgba(255, 42, 31, 0),
+      13px 5px 18px rgba(255, 119, 0, 0),
+      0 16px 22px rgba(7, 93, 255, 0),
+      0 18px 56px rgba(31, 38, 46, 0.08);
     transition:
       border-color 180ms ease,
-      box-shadow 220ms ease,
-      filter 220ms ease,
-      transform 220ms ease,
+      box-shadow 360ms ease,
+      filter 360ms ease,
+      transform 260ms ease,
       background-color 180ms ease;
+  }
+
+  .aura-hover::before {
+    content: "";
+    display: none;
   }
 
   .aura-hover:hover,
   .aura-hover:focus-within {
     border-color: hsl(var(--border));
+    box-shadow:
+      0 -13px 24px rgba(255, 42, 31, 0.62),
+      -13px 2px 18px rgba(255, 42, 31, 0.44),
+      13px 5px 18px rgba(255, 119, 0, 0.4),
+      0 16px 22px rgba(7, 93, 255, 0.34),
+      0 18px 56px rgba(31, 38, 46, 0.08);
     filter:
-      drop-shadow(-9px 0 9px rgba(255, 42, 31, 0.68))
-      drop-shadow(9px 0 9px rgba(255, 119, 0, 0.62))
-      drop-shadow(0 11px 9px rgba(7, 93, 255, 0.46));
+      drop-shadow(-9px 0 9px rgba(255, 42, 31, 0.38))
+      drop-shadow(9px 0 9px rgba(255, 119, 0, 0.3))
+      drop-shadow(0 11px 9px rgba(7, 93, 255, 0.22));
     transform: translateY(-1px);
+  }
+
+  .aura-hover:hover::before,
+  .aura-hover:focus-within::before {
+    opacity: 0;
   }
 
   .dark .aura-hover:hover,
   .dark .aura-hover:focus-within {
-    border-color: hsl(var(--border));
+    box-shadow:
+      0 -15px 28px 2px rgba(255, 42, 31, 0.84),
+      -16px 3px 24px 2px rgba(255, 42, 31, 0.68),
+      16px 5px 22px 2px rgba(255, 119, 0, 0.62),
+      0 19px 28px 2px rgba(7, 93, 255, 0.54),
+      0 18px 56px rgba(0, 0, 0, 0.36);
     filter:
-      drop-shadow(-9px 0 9px rgba(255, 42, 31, 0.72))
-      drop-shadow(9px 0 9px rgba(255, 119, 0, 0.66))
-      drop-shadow(0 11px 9px rgba(7, 93, 255, 0.56));
+      drop-shadow(-10px 0 12px rgba(255, 42, 31, 0.72))
+      drop-shadow(10px 0 12px rgba(255, 119, 0, 0.58))
+      drop-shadow(0 12px 12px rgba(7, 93, 255, 0.46));
   }
 
   .aura-button {
     isolation: isolate;
     overflow: visible;
     position: relative;
+    filter:
+      drop-shadow(-9px 0 9px rgba(255, 42, 31, 0))
+      drop-shadow(9px 0 9px rgba(255, 119, 0, 0))
+      drop-shadow(0 10px 8px rgba(7, 93, 255, 0));
+    box-shadow:
+      0 -11px 20px rgba(255, 42, 31, 0),
+      -11px 2px 16px rgba(255, 42, 31, 0),
+      11px 4px 16px rgba(255, 119, 0, 0),
+      0 14px 18px rgba(7, 93, 255, 0);
     transition:
-      transform 220ms ease,
+      box-shadow 380ms ease,
+      transform 260ms ease,
       background-color 180ms ease;
   }
 
   .aura-button::before {
-    background:
-      linear-gradient(90deg, rgba(255, 42, 31, 0.74), rgba(255, 119, 0, 0.68)),
-      linear-gradient(180deg, transparent 34%, rgba(7, 93, 255, 0.5));
-    border-radius: inherit;
     content: "";
-    inset: -7px;
-    opacity: 0;
-    pointer-events: none;
-    position: absolute;
-    z-index: -1;
-    filter: blur(8px);
-    transition: opacity 220ms ease, filter 220ms ease;
+    display: none;
   }
 
   .aura-button:hover:not(:disabled),
   .aura-button:focus-visible:not(:disabled) {
+    box-shadow:
+      0 -11px 20px rgba(255, 42, 31, 0.6),
+      -11px 2px 16px rgba(255, 42, 31, 0.42),
+      11px 4px 16px rgba(255, 119, 0, 0.4),
+      0 14px 18px rgba(7, 93, 255, 0.32);
+    filter:
+      drop-shadow(-8px 0 8px rgba(255, 42, 31, 0.38))
+      drop-shadow(8px 0 8px rgba(255, 119, 0, 0.3))
+      drop-shadow(0 9px 8px rgba(7, 93, 255, 0.24));
     transform: translateY(-1px);
   }
 
-  .aura-button:hover:not(:disabled)::before,
-  .aura-button:focus-visible:not(:disabled)::before {
-    opacity: 1;
+  .dark .aura-button:hover:not(:disabled),
+  .dark .aura-button:focus-visible:not(:disabled) {
+    box-shadow:
+      0 -12px 22px 1px rgba(255, 42, 31, 0.76),
+      -12px 2px 18px 1px rgba(255, 42, 31, 0.56),
+      12px 4px 18px 1px rgba(255, 119, 0, 0.54),
+      0 15px 20px 1px rgba(7, 93, 255, 0.48);
+    filter:
+      drop-shadow(-9px 0 10px rgba(255, 42, 31, 0.62))
+      drop-shadow(9px 0 10px rgba(255, 119, 0, 0.5))
+      drop-shadow(0 10px 10px rgba(7, 93, 255, 0.42));
   }
 }

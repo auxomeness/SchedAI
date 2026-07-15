@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
-import { AlertCircle, CalendarCheck2, Download, Eye, Facebook, FileDown, Github, Instagram, Linkedin, Lock, Moon, Plus, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
+import { AlertCircle, CalendarCheck2, Download, Eye, Facebook, FileDown, Github, Instagram, Linkedin, Lock, Moon, Palette, Plus, RefreshCw, RotateCcw, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomAurora } from "@/components/bottom-aurora";
 import { EmptyState } from "@/components/empty-state";
@@ -29,7 +29,8 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   subjectTimePreferences: [],
   preferCompact: true
 };
-const APP_VERSION = "0.2.9";
+const APP_VERSION = "0.3.0";
+const DEFAULT_SECTION_COLOR = "#dbeafe";
 
 interface ExportResult {
   format: "png" | "pdf";
@@ -48,9 +49,12 @@ interface SectionEditDraft {
   section: string;
   professor: string;
   room: string;
+  color: string;
 }
 
 export function AppShell() {
+  const resultRef = useRef<HTMLElement>(null);
+  const subjectPickerRef = useRef<HTMLDivElement>(null);
   const timetableRef = useRef<HTMLDivElement>(null);
   const [sections, setSections] = useState<ClassSection[]>([]);
   const [subjects, setSubjects] = useState<SubjectOption[]>([]);
@@ -76,7 +80,8 @@ export function AppShell() {
     subjectName: "",
     section: "",
     professor: "",
-    room: ""
+    room: "",
+    color: DEFAULT_SECTION_COLOR
   });
   const [hasRestoredSession, setHasRestoredSession] = useState(false);
 
@@ -152,6 +157,9 @@ export function AppShell() {
     setReasons([]);
     setError("");
     setFileName(loadedFileName);
+    window.requestAnimationFrame(() => {
+      setTimeout(() => subjectPickerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+    });
   }
 
   function handleRemoveFile() {
@@ -201,6 +209,9 @@ export function AppShell() {
     setSchedules(nextSchedules);
     setScheduleIndex(0);
     setReasons(nextSchedules.length ? [] : explainFailure(sections, selectedSubjects, preferences));
+    window.requestAnimationFrame(() => {
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+    });
   }
 
   function handleGenerateAnother() {
@@ -251,7 +262,8 @@ export function AppShell() {
       subjectName: section.subjectName,
       section: section.section ?? "",
       professor: section.professor ?? "",
-      room: section.room ?? ""
+      room: section.room ?? "",
+      color: normalizeHexColor(section.color, DEFAULT_SECTION_COLOR)
     });
   }
 
@@ -265,6 +277,7 @@ export function AppShell() {
       section: sectionEditDraft.section.trim() || undefined,
       professor: sectionEditDraft.professor.trim() || undefined,
       room: sectionEditDraft.room.trim() || undefined,
+      color: normalizeHexColor(sectionEditDraft.color, sectionEditTarget.section.color ?? DEFAULT_SECTION_COLOR),
       meetings: sectionEditTarget.section.meetings
     };
 
@@ -299,7 +312,7 @@ export function AppShell() {
       const dataUrl = await toPng(timetableRef.current, {
         cacheBust: true,
         pixelRatio: 2,
-        backgroundColor: isDarkMode ? "#000000" : "#ffffff"
+        backgroundColor: isDarkMode ? "#111318" : "#ffffff"
       });
 
       if (format === "png") {
@@ -347,7 +360,7 @@ export function AppShell() {
 
   return (
     <main className="schedai-root flex min-h-screen w-full max-w-none flex-col gap-8 overflow-x-hidden px-3 py-5 sm:px-6 lg:px-8">
-      <header className="sticky top-4 z-20 mx-auto flex h-auto w-full max-w-7xl flex-col gap-3 rounded-[24px] border border-white/50 bg-white/30 px-4 py-4 shadow-[inset_0_1px_rgba(255,255,255,0.65),0_18px_52px_rgba(31,38,46,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-black/50 sm:h-[62px] sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:px-5 sm:py-2">
+      <header className="sticky top-4 z-20 mx-auto flex h-auto w-full max-w-7xl flex-col gap-3 rounded-[24px] border border-white/50 bg-white/30 px-4 py-4 shadow-[inset_0_1px_rgba(255,255,255,0.65),0_18px_52px_rgba(31,38,46,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#151820]/70 sm:h-[62px] sm:flex-row sm:items-center sm:justify-between sm:gap-0 sm:px-5 sm:py-2">
         <a href="#" className="inline-flex items-baseline gap-1 text-xl font-extrabold tracking-tight">
           <span>SchedAI</span>
           <span className="font-normal text-muted-foreground">by Arxeni</span>
@@ -367,13 +380,13 @@ export function AppShell() {
 
       <div className="relative z-10 grid w-full min-w-0 gap-6 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]">
         <section className="min-w-0 space-y-5">
-          <div className="space-y-3 rounded-2xl border bg-white/70 p-3 shadow-sm dark:bg-[#050505]/90">
+          <div className="aura-hover space-y-3 rounded-2xl border bg-white p-3 shadow-sm dark:bg-[#151820]">
             <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
-              <div className="rounded-xl border bg-white/70 px-3 py-2 text-sm text-muted-foreground dark:bg-[#050505]/90">
+              <div className="rounded-xl border bg-white/70 px-3 py-2 text-sm text-muted-foreground dark:bg-[#171b24]/90">
                 {selectedSummary}
               </div>
               {frozenSchedules.length > 0 ? (
-                <div className="rounded-xl border bg-white/70 px-3 py-2 text-sm text-muted-foreground dark:bg-[#050505]/90">
+                <div className="rounded-xl border bg-white/70 px-3 py-2 text-sm text-muted-foreground dark:bg-[#171b24]/90">
                   {frozenSchedules.length} completed
                 </div>
               ) : null}
@@ -400,6 +413,11 @@ export function AppShell() {
                 <span className="min-w-0 truncate">Generate New</span>
               </Button>
             </div>
+            {schedules.length > 0 ? (
+              <p className="rounded-xl border bg-white/70 px-3 py-2 text-center text-xs text-muted-foreground dark:bg-[#171b24]/90">
+                Showing option {scheduleIndex + 1} of {schedules.length}.
+              </p>
+            ) : null}
           </div>
           <UploadPanel
             fileName={fileName}
@@ -410,14 +428,16 @@ export function AppShell() {
             onRemove={handleRemoveFile}
           />
           <ManualSubjectForm onAdd={handleManualAdd} />
-          <SubjectPicker
-            sections={sections}
-            subjects={subjects}
-            selectedSubjects={selectedSubjects}
-            selectedSectionIds={selectedSectionIds}
-            onChange={setSelectedSubjects}
-            onSelectedSectionIdsChange={setSelectedSectionIds}
-          />
+          <div ref={subjectPickerRef} className="scroll-mt-28">
+            <SubjectPicker
+              sections={sections}
+              subjects={subjects}
+              selectedSubjects={selectedSubjects}
+              selectedSectionIds={selectedSectionIds}
+              onChange={setSelectedSubjects}
+              onSelectedSectionIdsChange={setSelectedSectionIds}
+            />
+          </div>
           <PreferencesPanel
             preferences={preferences}
             selectedSubjects={selectedSubjects}
@@ -429,15 +449,10 @@ export function AppShell() {
               <CalendarCheck2 className="h-4 w-4" />
               Generate Schedule
             </Button>
-            {schedules.length > 0 ? (
-              <p className="text-center text-xs text-muted-foreground">
-                Showing option {scheduleIndex + 1} of {schedules.length}.
-              </p>
-            ) : null}
           </div>
         </section>
 
-        <section className="min-w-0 space-y-5">
+        <section ref={resultRef} className="min-w-0 scroll-mt-28 space-y-5">
           {error ? <FeedbackCard title="File could not be read" items={[{ message: error, suggestion: "Try a text-based PDF, CSV, or Excel file with subject, day, and time columns." }]} /> : null}
           {reasons.length > 0 ? <FeedbackCard title="Unable to generate a schedule" items={reasons} /> : null}
           {displaySchedule ? (
@@ -592,6 +607,46 @@ export function AppShell() {
                     onChange={(event) => setSectionEditDraft((draft) => ({ ...draft, room: event.target.value }))}
                   />
                 </div>
+                <div className="grid gap-3 rounded-2xl border bg-secondary/20 p-3 sm:col-span-2">
+                  <div className="flex items-center gap-2">
+                    <Palette className="h-4 w-4" />
+                    <Label htmlFor="edit-color">Block color</Label>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-[auto_minmax(0,1fr)_72px] sm:items-center">
+                    <input
+                      id="edit-color"
+                      type="color"
+                      value={normalizeHexColor(sectionEditDraft.color, DEFAULT_SECTION_COLOR)}
+                      onChange={(event) => setSectionEditDraft((draft) => ({ ...draft, color: event.target.value }))}
+                      className="h-12 w-full cursor-pointer rounded-xl border bg-card p-1 sm:w-16"
+                      aria-label="Choose class block color"
+                    />
+                    <Input
+                      value={sectionEditDraft.color}
+                      onChange={(event) => setSectionEditDraft((draft) => ({ ...draft, color: event.target.value }))}
+                      onBlur={() => setSectionEditDraft((draft) => ({ ...draft, color: normalizeHexColor(draft.color, DEFAULT_SECTION_COLOR) }))}
+                      placeholder="#dbeafe"
+                      aria-label="Hex color"
+                    />
+                    <div
+                      className="h-12 rounded-xl border"
+                      style={{ backgroundColor: normalizeHexColor(sectionEditDraft.color, DEFAULT_SECTION_COLOR) }}
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {["#dbeafe", "#d1fae5", "#fef3c7", "#ffe4e6", "#e0e7ff", "#ccfbf1", "#f5f5f4", "#fecaca", "#fed7aa", "#bfdbfe"].map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        className="h-8 w-8 rounded-lg border shadow-sm transition hover:scale-105"
+                        style={{ backgroundColor: color }}
+                        onClick={() => setSectionEditDraft((draft) => ({ ...draft, color }))}
+                        aria-label={`Use ${color}`}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <Button type="button" variant="outline" onClick={() => setSectionEditTarget(undefined)}>
@@ -605,7 +660,7 @@ export function AppShell() {
           </Card>
         </div>
       ) : null}
-      <footer className="relative z-10 -mx-3 -mb-5 mt-12 min-h-[78vh] overflow-hidden border-t bg-white px-4 py-14 text-slate-600 dark:border-white/10 dark:bg-[#050607] dark:text-slate-400 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <footer className="relative z-10 -mx-3 -mb-5 mt-12 min-h-[78vh] overflow-hidden border-t bg-white px-4 py-14 text-slate-600 dark:border-white/10 dark:bg-[#10131a] dark:text-slate-400 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <BottomAurora />
         <div className="relative z-10 mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,0.76fr)_minmax(0,1.6fr)]">
           <div className="grid content-start gap-5">
@@ -624,13 +679,25 @@ export function AppShell() {
               title="Explore"
               links={[
                 { label: "Workspace", href: "/" },
+                { label: "Developer", href: "/about" },
                 { label: "Imports", href: "/imports" },
                 "Upload",
                 "Subjects",
                 "Preferences"
               ]}
             />
-            <FooterColumn title="More from Arxeni" links={["Expy", "Lumen", "APOS Web", "APOS Mobile", "ProxiFix"]} />
+            <FooterColumn
+              title="More from Arxeni"
+              links={[
+                { label: "Scan by Arxeni", href: "https://scan-by-arxeni.vercel.app" },
+                { label: "Expy", href: "https://expy-web-one.vercel.app" },
+                { label: "Lumen", href: "https://lumenhq.vercel.app/login" },
+                { label: "APOS Web", href: "https://ateneo-preorder.vercel.app/login" },
+                { label: "APOS Mobile", href: "https://adnu-preorder.vercel.app/login" },
+                { label: "ProxiFix", href: "https://proxifix-web.pages.dev" },
+                { label: "Scribo", href: "https://scribobyarxeni.vercel.app" }
+              ]}
+            />
             <FooterColumn
               title="Follow"
               links={[
@@ -694,6 +761,11 @@ function buildSelectedSectionIdsFromPreferred(
       .map((section) => section.id);
     return result;
   }, {});
+}
+
+function normalizeHexColor(value: string | undefined, fallback: string) {
+  const candidate = value?.trim();
+  return candidate && /^#[0-9a-f]{6}$/i.test(candidate) ? candidate : fallback;
 }
 
 type FooterLink = string | {

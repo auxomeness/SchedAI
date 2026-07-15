@@ -123,11 +123,11 @@ export function PreferencesPanel({ preferences, selectedSubjects, subjects, onCh
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#050505]/90">
+        <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#151820]/90">
           <div className="text-sm font-medium">Days without class</div>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {DAYS.map((day) => (
-              <label key={day} className="flex cursor-pointer items-center gap-2 rounded-lg border bg-white px-3 py-2 text-sm dark:bg-[#050505]">
+              <label key={day} className="flex cursor-pointer items-center gap-2 rounded-lg border bg-white px-3 py-2 text-sm dark:bg-[#171b24]">
                 <Checkbox
                   checked={blockedDays.has(day) || (day === "FRI" && preferences.noFriday)}
                   onCheckedChange={(checked) => toggleBlockedDay(day, checked === true)}
@@ -138,12 +138,12 @@ export function PreferencesPanel({ preferences, selectedSubjects, subjects, onCh
           </div>
         </div>
 
-        <label className="flex items-center gap-3 rounded-xl border bg-white/60 p-3 dark:bg-[#050505]/90">
+        <label className="flex items-center gap-3 rounded-xl border bg-white/60 p-3 dark:bg-[#151820]/90">
           <Checkbox checked={preferences.preferCompact} onCheckedChange={(checked) => update({ preferCompact: checked === true })} />
           <span className="text-sm font-medium">Prefer compact schedule</span>
         </label>
 
-        <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#050505]/90">
+        <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#151820]/90">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="text-sm font-medium">Preferred subject times</div>
@@ -153,7 +153,7 @@ export function PreferencesPanel({ preferences, selectedSubjects, subjects, onCh
             </div>
             <button
               type="button"
-              className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl border bg-white/70 px-3 text-sm font-medium hover:bg-secondary disabled:pointer-events-none disabled:opacity-50 dark:bg-[#050505]"
+              className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl border bg-white/70 px-3 text-sm font-medium hover:bg-secondary disabled:pointer-events-none disabled:opacity-50 dark:bg-[#171b24]"
               onClick={addSubjectTimePreference}
               disabled={subjectOptions.length === 0}
             >
@@ -165,7 +165,7 @@ export function PreferencesPanel({ preferences, selectedSubjects, subjects, onCh
           {subjectTimePreferences.length > 0 ? (
             <div className="mt-3 space-y-3">
               {subjectTimePreferences.map((item, index) => (
-                <div key={item.id} className="rounded-xl border bg-white/70 p-3 dark:bg-[#050505]">
+                <div key={item.id} className="rounded-xl border bg-white/70 p-3 dark:bg-[#171b24]">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       Rule {index + 1}
@@ -221,7 +221,7 @@ export function PreferencesPanel({ preferences, selectedSubjects, subjects, onCh
           ) : null}
         </div>
 
-        <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#050505]/90">
+        <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#151820]/90">
           <label className="flex items-center gap-3">
             <Checkbox
               checked={preferences.protectBreak}
@@ -245,7 +245,7 @@ export function PreferencesPanel({ preferences, selectedSubjects, subjects, onCh
 
           <div className="mt-3 space-y-3">
             {breakWindows.map((breakWindow, index) => (
-              <div key={breakWindow.id} className="rounded-xl border bg-white/70 p-3 dark:bg-[#050505]">
+              <div key={breakWindow.id} className="rounded-xl border bg-white/70 p-3 dark:bg-[#171b24]">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Break {index + 1}</span>
                   <button
@@ -280,7 +280,7 @@ export function PreferencesPanel({ preferences, selectedSubjects, subjects, onCh
 
             <button
               type="button"
-              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border bg-white/70 text-sm font-medium hover:bg-secondary dark:bg-[#050505]"
+              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border bg-white/70 text-sm font-medium hover:bg-secondary dark:bg-[#171b24]"
               onClick={addBreak}
             >
               <Plus className="h-4 w-4" />

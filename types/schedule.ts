@@ -13,6 +13,7 @@ export interface ClassSection {
   section?: string;
   professor?: string;
   room?: string;
+  color?: string;
   meetings: Meeting[];
 }
 

@@ -113,6 +113,19 @@ export function SubjectPicker({
     onSelectedSectionIdsChange({});
   }
 
+  function selectAllShown() {
+    const visibleCodes = filteredSubjects.map((subject) => subject.code);
+    const nextSubjects = Array.from(new Set([...selectedSubjects, ...visibleCodes])).sort();
+    const nextSections = { ...selectedSectionIds };
+
+    visibleCodes.forEach((code) => {
+      nextSections[code] = allSectionIds(code);
+    });
+
+    onChange(nextSubjects);
+    onSelectedSectionIdsChange(nextSections);
+  }
+
   function renderSearch() {
     return (
       <div className="relative">
@@ -130,6 +143,9 @@ export function SubjectPicker({
   function renderActions({ showExpand }: { showExpand: boolean }) {
     return (
       <div className="flex flex-wrap gap-2">
+        <Button type="button" size="sm" variant="outline" onClick={selectAllShown}>
+          Select all
+        </Button>
         <Button type="button" size="sm" variant="ghost" onClick={clearAll}>
           Uncheck all
         </Button>
@@ -161,7 +177,7 @@ export function SubjectPicker({
           const isExpanded = expandedSubjects.includes(subject.code);
 
           return (
-            <div key={subject.code} className="rounded-xl border bg-white/60 dark:bg-[#050505]/90">
+            <div key={subject.code} className="rounded-xl border bg-white/60 dark:bg-[#151820]/90">
               <div className="flex items-start gap-3 p-3">
                 <Checkbox checked={isSelected} onCheckedChange={(checked) => toggleSubject(subject.code, checked === true)} />
                 <button type="button" className="min-w-0 flex-1 text-left" onClick={() => toggleExpanded(subject.code)}>
@@ -250,7 +266,7 @@ export function SubjectPicker({
                   </div>
                 </div>
               ) : (
-                <p className="rounded-xl border bg-white/60 p-3 text-sm text-muted-foreground dark:bg-[#050505]/90">
+                <p className="rounded-xl border bg-white/60 p-3 text-sm text-muted-foreground dark:bg-[#151820]/90">
                   Nothing selected yet. Check the subjects or exact sections you want to include.
                 </p>
               )}
