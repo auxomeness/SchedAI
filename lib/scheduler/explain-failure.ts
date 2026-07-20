@@ -111,6 +111,13 @@ export function explainFailure(
     }
   }
 
+  if (reasons.length === 0 && preferences.preventThreeConsecutive) {
+    reasons.push({
+      message: "Every available combination creates 3 or more back-to-back classes on at least one day.",
+      suggestion: "Try turning off this preference or choosing sections with a gap between classes."
+    });
+  }
+
   if (reasons.length === 0) {
     reasons.push({
       message: "The selected subjects cannot fit together under the current preferences.",

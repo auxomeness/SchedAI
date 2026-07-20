@@ -36,6 +36,7 @@ export interface SchedulePreferences {
   breakStart?: number;
   breakEnd?: number;
   maxClassesPerDay?: number;
+  preventThreeConsecutive: boolean;
   preferCompact: boolean;
 }
 

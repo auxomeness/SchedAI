@@ -27,9 +27,10 @@ const DEFAULT_PREFERENCES: SchedulePreferences = {
   protectBreak: false,
   breaks: [],
   subjectTimePreferences: [],
+  preventThreeConsecutive: false,
   preferCompact: true
 };
-const APP_VERSION = "0.3.0";
+const APP_VERSION = "0.3.1";
 const DEFAULT_SECTION_COLOR = "#dbeafe";
 
 interface ExportResult {

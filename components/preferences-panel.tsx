@@ -143,6 +143,20 @@ export function PreferencesPanel({ preferences, selectedSubjects, subjects, onCh
           <span className="text-sm font-medium">Prefer compact schedule</span>
         </label>
 
+        <label className="flex items-start gap-3 rounded-xl border bg-white/60 p-3 dark:bg-[#151820]/90">
+          <Checkbox
+            checked={preferences.preventThreeConsecutive}
+            onCheckedChange={(checked) => update({ preventThreeConsecutive: checked === true })}
+            className="mt-0.5"
+          />
+          <span>
+            <span className="block text-sm font-medium">Avoid 3 consecutive classes</span>
+            <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+              Allows only 2 back-to-back subjects in the same day.
+            </span>
+          </span>
+        </label>
+
         <div className="rounded-xl border bg-white/60 p-3 dark:bg-[#151820]/90">
           <div className="flex items-start justify-between gap-3">
             <div>

@@ -54,6 +54,29 @@ function exceedsDailyLimit(sections: ClassSection[], preferences: SchedulePrefer
   return Array.from(counts.values()).some((count) => count > preferences.maxClassesPerDay!);
 }
 
+function hasThreeConsecutiveMeetings(sections: ClassSection[], preferences: SchedulePreferences): boolean {
+  if (!preferences.preventThreeConsecutive) return false;
+
+  const byDay = new Map<string, ClassSection["meetings"]>();
+  sections.forEach((section) => {
+    section.meetings.forEach((meeting) => {
+      byDay.set(meeting.day, [...(byDay.get(meeting.day) ?? []), meeting]);
+    });
+  });
+
+  return Array.from(byDay.values()).some((meetings) => {
+    const sorted = [...meetings].sort((a, b) => a.start - b.start || a.end - b.end);
+    let consecutiveCount = 1;
+
+    for (let index = 1; index < sorted.length; index += 1) {
+      consecutiveCount = sorted[index].start === sorted[index - 1].end ? consecutiveCount + 1 : 1;
+      if (consecutiveCount >= 3) return true;
+    }
+
+    return false;
+  });
+}
+
 function conflictsWithExisting(section: ClassSection, selected: ClassSection[]): boolean {
   return selected.some((existing) => meetingsOverlap(section.meetings, existing.meetings));
 }
@@ -85,7 +108,7 @@ export function generateSchedules(
   function backtrack(index: number, selected: ClassSection[]) {
     if (results.length >= MAX_RESULTS) return;
     if (index === bySubject.length) {
-      if (!exceedsDailyLimit(selected, preferences)) {
+      if (!exceedsDailyLimit(selected, preferences) && !hasThreeConsecutiveMeetings([...lockedSections, ...selected], preferences)) {
         results.push({
           sections: [...selected].sort((a, b) => a.subjectCode.localeCompare(b.subjectCode)),
           score: scoreSchedule(selected, preferences),
@@ -100,6 +123,7 @@ export function generateSchedules(
       if (conflictsWithExisting(section, selected)) return;
       if (conflictsWithExisting(section, lockedSections)) return;
       if (exceedsDailyLimit([...lockedSections, ...next], preferences)) return;
+      if (hasThreeConsecutiveMeetings([...lockedSections, ...next], preferences)) return;
       backtrack(index + 1, next);
     });
   }
